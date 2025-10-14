@@ -25,7 +25,7 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #for now pass everything as arguments
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 20 * a0      # extend beyond peak
+    rmax = 10 * a0      # extend beyond peak
 
     print ('this is a_o', a0)
     t_eval = np.linspace(r0,rmax,1510)
@@ -40,7 +40,7 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #for now pass everything as arguments
     plt.show()
 
 
-print(sch_solver(1,0.000511,100000000000,2,1/137,0))
+print(sch_solver(0,0.000511,100000000000,1,1/137,0))
     
 
 
