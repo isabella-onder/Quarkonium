@@ -1,7 +1,6 @@
 #%%
 
 
-
 import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,11 +15,9 @@ def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential 
 
 
 
-def sch_solver(l,m_1,m_2, n, alpha, beta): #for now pass everything as arguments
+def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #for now pass everything as arguments
     mu = (1/m_1 + 1/m_2) ** (-1)
-    E_nl = - mu * alpha**2/(2*n**2)
-    print(E_nl)
-    #print('this is mu', mu)
+    
     initial_conditions = [0,1] #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
@@ -40,7 +37,9 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #for now pass everything as arguments
     plt.show()
 
 
-print(sch_solver(0,0.000511,100000000000,3,1/137,0))
+def energy_finder(l, m_1, m_2, E_nl, alpha, beta):
+    
+#print(sch_solver(0,0.000511,100000000000,3,1/137,0))
     
 
 
