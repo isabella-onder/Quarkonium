@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 #testing by doing a simple spring SHM system
 
-def system(t, Y, w ): #defining my system of differential equations according to all variables
+def system(t, Y, w): #defining my system of differential equations according to all variables
     y1, y2 = Y                                #unpacking y 
     dy1_dt = y2                             
     dy2_dt = - w**2 * y1
