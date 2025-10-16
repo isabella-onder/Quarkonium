@@ -7,6 +7,13 @@ import matplotlib.pyplot as plt
 
 #important to note: using h_bar = c = 1
 
+def hydrogen_energies(n):
+    mu = 0.000511
+    alpha = 1/137
+    E_n = - mu * alpha**2/(2*n**2)
+    print(E_n)
+print(hydrogen_energies(3))
+
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations according to all variables
     u, v = Y                                #unpacking y 
     du_dr = v                               
@@ -28,9 +35,9 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #for now pass everything as argume
     r0 = 1e-6 * a0     # small start
     rmax = 10 * a0      # extend beyond peak
 
-    #print ('this is a_o', a0)
+
     t_eval = np.linspace(r0,rmax,1510)
-    #print(t_eval)
+
 
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = t_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) #need to find a way to put r in GeV as in get all the units right
     u, v = sol.y[0], sol.y[1]
@@ -90,7 +97,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
 #print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
 
-def plotter(l, m_1, m_2, energies, alpha, beta):
+def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     energies = energy_finder(l, m_1, m_2, energies, alpha, beta)
     E_nl = energies[1]
     print('This is the estimated E_nl', E_nl)
@@ -98,7 +105,18 @@ def plotter(l, m_1, m_2, energies, alpha, beta):
     plt.scatter(r, u, marker = '.')
     plt.show()
 
+    integral = sp.integrate.simpson(u**2,r)
+    print('this is integral result', integral)
 
-plotter(0,0.000511,100000000000,[-13.5 * 1e-9, 0, -14 * 1e-9]  ,1/137,0)
+    normalised_u = u/(np.sqrt(integral))
+    normalised_check = sp.integrate.simpson(normalised_u**2, r)
+    print('this is normalised check: hopefully one', normalised_check)
+
+    plt.scatter(r, normalised_u, marker = '.')
+    plt.show()
+    plt.scatter(r, normalised_u**2, marker = '.')
+    plt.show()
+
+plotter_and_normaliser(0,0.000511,100000000000,[-13.5 * 1e-9, 0, -13.7 * 1e-9]  ,1/137,0)
 
     
