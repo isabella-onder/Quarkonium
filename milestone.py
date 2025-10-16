@@ -26,7 +26,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #for now pass everything as argume
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 15 * a0      # extend beyond peak
+    rmax = 10 * a0      # extend beyond peak
 
     #print ('this is a_o', a0)
     t_eval = np.linspace(r0,rmax,1510)
@@ -52,36 +52,53 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #for now pass everything as argume
     #plt.scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
     #plt.show()
 
-    return(nodes_nb, turning_points_nb)
+    return(nodes_nb, turning_points_nb, u, r)
 
 
 
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy bounds
-    turning_points_nb = []
-    nodes_nb = []  
-    E_2 = (energies[0] + energies[-1])/2
-    energies = [energies[0], E_2 , energies[-1]]
-    print(energies, E_2)
-    #energies = [-13.590 * 1e-9, -13.620 * 1e-9, -13.750 * 1e-9]  
-    for E_nl in energies:  #loop over 1,2,3 and store in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
-        n_nb, tp_nb = sch_solver(l, m_1, m_2, E_nl, alpha, beta)
-        nodes_nb.append(n_nb)
-        turning_points_nb.append(tp_nb)
-    print (nodes_nb, turning_points_nb)
+    
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
+
+        E_2 = (energies[0] + energies[-1])/2
+        energies = [energies[0], E_2 , energies[-1]]
+        print(energies, E_2)
+    
+
+        turning_points_nb = []
+        nodes_nb = []  
+
+        for E_nl in energies:  #loop over 1,2,3 and store in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
+            n_nb, tp_nb, _, _= sch_solver(l, m_1, m_2, E_nl, alpha, beta)
+            nodes_nb.append(n_nb)
+            turning_points_nb.append(tp_nb)
+        print (nodes_nb, turning_points_nb)
 
 
-    #replacing it such as to narrow down
-    if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-        print('E_1 and E_2 are different')
-        energies[2] = energies[1]
+        #replacing it such as to narrow down
+        if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
+            print('E_1 and E_2 are different')
+            energies[2] = energies[1]
 
-    elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-        print('E_2 and E_3 are different')
-        energies[0] = energies[1]
-
-
+        elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
+            print('E_2 and E_3 are different')
+            energies[0] = energies[1]
+    print(energies)
+    return energies
     
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
-print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
+#print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
+
+def plotter(l, m_1, m_2, energies, alpha, beta):
+    energies = energy_finder(l, m_1, m_2, energies, alpha, beta)
+    E_nl = energies[1]
+    print('This is the estimated E_nl', E_nl)
+    _, _, u, r = sch_solver(l, m_1, m_2, E_nl, alpha, beta)
+    plt.scatter(r, u, marker = '.')
+    plt.show()
+
+
+plotter(0,0.000511,100000000000,[-13.5 * 1e-9, 0, -14 * 1e-9]  ,1/137,0)
+
     
