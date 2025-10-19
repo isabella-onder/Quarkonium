@@ -13,7 +13,7 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
     alpha = 1/137 
     E_n = - mu * alpha**2/(2*n**2)
     print(E_n)
-
+hydrogen_energies(3)
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
@@ -31,7 +31,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 10 * a0     # extend beyond peak
+    rmax = 40 * a0     # extend beyond peak
 
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -120,7 +120,7 @@ def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     plt.scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
-plotter_and_normaliser(1,0.000511,100000000000,[-1.515 * 1e-9, 0, -1.511 * 1e-9]  ,1/137,0)
-#plotter_and_normaliser(0,0.000511,100000000000,[-100 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+#plotter_and_normaliser(1,0.000511,100000000000,[-1.516 * 1e-9, 0, -1.510 * 1e-9]  ,1/137,0)
+plotter_and_normaliser(0,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
 
-    
+#for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
