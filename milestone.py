@@ -8,6 +8,15 @@ import matplotlib.pyplot as plt
 #important to note: using h_bar = c = 1
 
 
+#unit converters:
+def kg_to_GeVc2(m):                 #input mass in kg
+    return m * 5.610 * 10 **26
+
+def m_to_GeV(r):                    #input length in m
+    return r * 5.0677 * 10 ** 15
+
+
+
 def hydrogen_energies(n):               #for convenience: exact energy calculator for Hydrogen given n
     mu = 0.000511 #electron mass in GeV/c^-2
     alpha = 1/137 
@@ -106,7 +115,7 @@ def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     print('This is the estimated E_nl', E_nl)
     _, _, u, r = sch_solver(l, m_1, m_2, E_nl, alpha, beta)
 
-    plt.scatter(r, u, marker = '.')
+    plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
     plt.show()
 
     integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
