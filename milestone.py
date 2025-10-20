@@ -13,7 +13,7 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
     alpha = 1/137 
     E_n = - mu * alpha**2/(2*n**2)
     print(E_n)
-hydrogen_energies(3)
+hydrogen_energies(1)
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
@@ -31,7 +31,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 40 * a0     # extend beyond peak
+    rmax = 10 * a0     # extend beyond peak
 
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -65,7 +65,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
     
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:
 
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
