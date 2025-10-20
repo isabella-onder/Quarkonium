@@ -20,7 +20,7 @@ def m_to_GeV(r):                    #input length in m
 def hydrogen_energies(n):               #for convenience: exact energy calculator for Hydrogen given n
     mu = 0.000511 #electron mass in GeV/c^-2
     alpha = 1/137 
-    E_n = - mu * alpha**2/(2*n**2)
+    E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
     print(E_n)
 hydrogen_energies(1)
 
@@ -68,8 +68,6 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 #sch_solver(1,0.000511,100000000000,-1.5125*10**(-9)  ,1/137,0)
 #sch_solver(1,0.000511,100000000000,-1.511*10**(-9)  ,1/137,0)
 #sch_solver(1,0.000511,100000000000,-1.515*10**(-9)  ,1/137,0)
-
-
 
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
@@ -130,6 +128,14 @@ def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     plt.show()
 
 #plotter_and_normaliser(1,0.000511,100000000000,[-1.516 * 1e-9, 0, -1.510 * 1e-9]  ,1/137,0)
-plotter_and_normaliser(0,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
 
 #for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
+
+'''
+def energy_range_finder(l,m_1,m_2, n_max, alpha, beta):             #want to make it such that it finds all the energy levels on its own
+                                                                    #hence will give random lower bound and once it calculates first energy, will go upwards from there
+
+    energy_range = [-20 * 1e-9, -10 * 1e-9]
+    for n in range(1, n_max+1):
+'''
