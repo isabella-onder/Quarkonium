@@ -65,7 +65,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
     
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
 
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
