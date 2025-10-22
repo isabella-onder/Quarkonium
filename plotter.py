@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 
 #important to note: using h_bar = c = 1
 
+
+def hydrogen_energies(n):               #for convenience: exact energy calculator for Hydrogen given n
+    mu = 0.000511 #electron mass in GeV/c^-2
+    alpha = 1/137 
+    E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
+    return E_n
+
+
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
     du_dr = v                               
@@ -14,13 +22,14 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
+def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
+    E_nl = hydrogen_energies(n)
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 150 * a0     # extend beyond peak
+    rmax = 13 * a0     # extend beyond peak
 
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -55,4 +64,4 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(0,0.000511,100000000000,-0.27755*10**(-9)  ,1/137,0)
+sch_solver(0,0.000511,100000000000,2 ,1/137,0)

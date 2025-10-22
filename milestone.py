@@ -21,8 +21,8 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
     mu = 0.000511 #electron mass in GeV/c^-2
     alpha = 1/137 
     E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
-    print(E_n)
-hydrogen_energies(1)
+    return E_n
+#hydrogen_energies(1)
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
@@ -71,13 +71,13 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
-    
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:
-
+    energies[2] = energies[2] + (0.1 * 1e-9)
+    #print('hopefully, it has either begun or undergone a break')
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
-        print(energies, E_2)
+        print(energies)
     
 
         turning_points_nb = []
@@ -90,15 +90,23 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy
         print (nodes_nb, turning_points_nb)
 
 
+        #if all nodes/turning_points are the same, means they are both on the same side as the solution: add small step to the far side and restart iteration
+        if nodes_nb[0] == nodes_nb[1] == nodes_nb[2] and turning_points_nb[0] == turning_points_nb[1] == turning_points_nb[2]: 
+            energies[2] = energies[2] + (0.1 * 1e-9)
+            #print('the energies were hopefully updated', energies)
+            continue
+        
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
-        if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-            print('E_1 and E_2 are different')
+        elif nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
+            #print('E_1 and E_2 are different')
             energies[2] = energies[1]
 
         elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-            print('E_2 and E_3 are different')
+            #print('E_2 and E_3 are different')
             energies[0] = energies[1]
-    print(energies)
+
+        
+    #print(energies)
     return energies
     
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
@@ -127,15 +135,23 @@ def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     plt.scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
-#plotter_and_normaliser(1,0.000511,100000000000,[-1.516 * 1e-9, 0, -1.510 * 1e-9]  ,1/137,0)
-plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
+plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+#plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
 
 #for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
 
-'''
-def energy_range_finder(l,m_1,m_2, n_max, alpha, beta):             #want to make it such that it finds all the energy levels on its own
+
+def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta):             #want to make it such that it finds all the energy levels on its own
                                                                     #hence will give random lower bound and once it calculates first energy, will go upwards from there
 
-    energy_range = [-20 * 1e-9, -10 * 1e-9]
+    energy_range = [E_initial, 0, E_initial]
     for n in range(1, n_max+1):
-'''
+        E_n = energy_finder(l, m_1, m_2, energy_range, alpha, beta)[1]
+        print(E_n, 'hopefully the final energy')
+        print('this is iteration n', n)
+        energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
+        print('and this is the next energy range to try', energy_range)
+
+#energy_range_finder(0,0.000511,100000000000, 2, -3.9132812500000475e-09,1/137,0)
+
+
