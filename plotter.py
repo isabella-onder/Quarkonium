@@ -9,9 +9,10 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
     mu = 0.000511 #electron mass in GeV/c^-2
     alpha = 1/137 
     E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
+    print('the requested E_n', E_n)
     return E_n
 
-print(hydrogen_energies(2))
+
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
@@ -31,8 +32,8 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
-    rmax = 10 * a0     # extend beyond peak
-
+    rmax = 10* a0     # extend beyond peak
+    print(50 * a0)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -44,6 +45,7 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     #automatically finds steps where evaluates to 0 thanks to trigger above)
     nodes_location = sol.t_events[0]
     nodes_nb = len(nodes_location)
+    
 
     #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
@@ -68,4 +70,4 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(0,0.000511,100000000000,1 ,1/137,0)
+sch_solver(0,0.000511,100000000000,3 ,1/137,0)
