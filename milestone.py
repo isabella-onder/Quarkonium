@@ -52,13 +52,16 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 
     #automatically finds steps where evaluates to 0 (thanks to trigger aboce)
     nodes_location = sol.t_events[0]
+    print('these are the nodes_location', nodes_location)
     nodes_nb = len(nodes_location)
-    final_node = nodes_location[-1]
+    final_node = nodes_location[-1] 
     
+
 
     #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
     turning_points_location = r[turning_points_index]
+    print('these are the turning points location', turning_points_location)
     turning_points_nb = len(turning_points_location)
 
 
@@ -84,6 +87,8 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 
         turning_points_nb = []
         nodes_nb = []  
+
+
 
         for E_nl in energies:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
             n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
@@ -123,67 +128,29 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
     final_node = final_nodes[0]  
     rmax = final_node
+    print('This is rmax', rmax)
 
     print('This is the estimated E_nl', E_nl)
-    _, _, u, r, final_node = sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
-
-    plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
-    plt.show()
+    nodes_nb, turning_points_nb, u, r, final_node = sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
+    print('this is nodes_nb and turning points nb of our plotted one', nodes_nb, turning_points_nb)
+    #plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
+    #plt.show()
+  
 
     integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
     print('this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
     print('this is normalised check: hopefully one', normalised_check)
-
-    plt.scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    plt.show()
-    plt.scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
+    normalised_u_squared = normalised_u**2
+    fig, axs = plt.subplots(1, 2)
+    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
+    axs[1].scatter(r, normalised_u_squared, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
 #plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
 #plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
 
-#for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
-'''
-def r_max_finder(mu, n, l, E_nl, alpha, beta, r0, a0): #passing all system parameters as arguments to make adaptable code for different particles
-    'r_max finder is being used'
-    initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
-
-    rmax = 10 * a0     # initialising
-    turning_points_nb = 0         # initialising
-    nodes_nb = 0
-
-
-    #want the turning points to be n-l and nodes n- l + 1(due to one at the start too)
-    #need to make sure that despite it not being inside, does update appropriately
-    while turning_points_nb != (n-l) and nodes_nb != (n-l+1):
-        print('this is rmax', rmax, 'and these are the turning points_nb and nodes_nb', turning_points_nb, nodes_nb)
-        r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
-
-        #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-        sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
-        u, v = sol.y[0], sol.y[1] 
-        r = sol.t
-
-        #automatically finds steps where evaluates to 0 thanks to trigger above)
-        nodes_location = sol.t_events[0]
-        nodes_nb = len(nodes_location)
-
-        #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
-        turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
-        turning_points_location = r[turning_points_index]
-        turning_points_nb = len(turning_points_location)
-
-        rmax = rmax + 1 * a0
-
-
-    #plt.scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
-    #plt.show()
-
-    return rmax
-
-'''
 
 def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):             #want to make it such that it finds all the energy levels on its own
                                                                   #hence will give random lower bound and once it calculates first energy, will go upwards from there
@@ -204,5 +171,5 @@ def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):        
 
 
 #energy_range_finder(0,0.000511,100000000000, 1, -13.7*1e-9,1/137,0)
-plotter_and_normaliser(0,0.000511 ,100000000000 , -3.7 * 1e-9, 1/137, 0, 1, 13405088.062622378)
+plotter_and_normaliser(1,0.000511 ,100000000000 , -1.6 * 1e-9, 1/137, 0, 1, 40215264.187867135)
 
