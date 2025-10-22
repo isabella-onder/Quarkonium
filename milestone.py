@@ -34,14 +34,14 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
+def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n): #passing all system parameters as arguments to make adaptable code for different particles
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
     rmax = 10 * a0     # extend beyond peak
-
+    #rmax = r_max_finder(mu, n, l, E_nl, alpha, beta, r0, a0) 
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -70,7 +70,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as 
 #sch_solver(1,0.000511,100000000000,-1.515*10**(-9)  ,1/137,0)
 
 
-def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
+def energy_finder(l, m_1, m_2, energies, alpha, beta,n):   #input list with energy range boundaries within which to search
     energies[2] = energies[2] + (0.1 * 1e-9)
     #print('hopefully, it has either begun or undergone a break')
     while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
@@ -84,7 +84,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy
         nodes_nb = []  
 
         for E_nl in energies:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
-            n_nb, tp_nb, _, _= sch_solver(l, m_1, m_2, E_nl, alpha, beta)
+            n_nb, tp_nb, _, _= sch_solver(l, m_1, m_2, E_nl, alpha, beta,n)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
@@ -114,12 +114,12 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy
 
 
 
-def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
+def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta,n):
 
-    energies = energy_finder(l, m_1, m_2, energies, alpha, beta)
+    energies = energy_finder(l, m_1, m_2, energies, alpha, beta,n)
     E_nl = energies[1]                                                #extracting final iteration of energy_finder and taking it as E_nl to evaluate at
     print('This is the estimated E_nl', E_nl)
-    _, _, u, r = sch_solver(l, m_1, m_2, E_nl, alpha, beta)
+    _, _, u, r = sch_solver(l, m_1, m_2, E_nl, alpha, beta,n)
 
     plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
     plt.show()
@@ -135,23 +135,61 @@ def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
     plt.scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
-plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+#plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
 #plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
 
 #for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
+'''
+def r_max_finder(mu, n, l, E_nl, alpha, beta, r0, a0): #passing all system parameters as arguments to make adaptable code for different particles
+    'r_max finder is being used'
+    initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
+    rmax = 10 * a0     # initialising
+    turning_points_nb = 0         # initialising
+    nodes_nb = 0
+
+
+    #want the turning points to be n-l and nodes n- l + 1(due to one at the start too)
+    #need to make sure that despite it not being inside, does update appropriately
+    while turning_points_nb != (n-l) and nodes_nb != (n-l+1):
+        print('this is rmax', rmax, 'and these are the turning points_nb and nodes_nb', turning_points_nb, nodes_nb)
+        r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+
+        #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
+        sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
+        u, v = sol.y[0], sol.y[1] 
+        r = sol.t
+
+        #automatically finds steps where evaluates to 0 thanks to trigger above)
+        nodes_location = sol.t_events[0]
+        nodes_nb = len(nodes_location)
+
+        #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
+        turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
+        turning_points_location = r[turning_points_index]
+        turning_points_nb = len(turning_points_location)
+
+        rmax = rmax + 1 * a0
+
+
+    #plt.scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
+    #plt.show()
+
+    return rmax
+
+'''
 
 def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta):             #want to make it such that it finds all the energy levels on its own
                                                                     #hence will give random lower bound and once it calculates first energy, will go upwards from there
 
     energy_range = [E_initial, 0, E_initial]
     for n in range(1, n_max+1):
-        E_n = energy_finder(l, m_1, m_2, energy_range, alpha, beta)[1]
+        E_n = energy_finder(l, m_1, m_2, energy_range, alpha, beta,n)[1]
         print(E_n, 'hopefully the final energy')
         print('this is iteration n', n)
         energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
         print('and this is the next energy range to try', energy_range)
 
-#energy_range_finder(0,0.000511,100000000000, 2, -3.9132812500000475e-09,1/137,0)
+energy_range_finder(0,0.000511,100000000000, 1, -13.7*1e-9,1/137,0)
 
 
