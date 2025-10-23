@@ -74,7 +74,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
     energies[2] = energies[2] + (0.1 * 1e-9)
     #print('hopefully, it has either begun or undergone a break')
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
@@ -126,9 +126,15 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
 #print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
 
-def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):             
+def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):             
                                                                   
     energy_range = [E_initial, 0, E_initial]
+    
+    E_n, final_node = energy_finder(l,m_1,m_2, energy_range, alpha, beta, n, rmax)
+    return E_n, final_node
+
+    
+    '''
     returned_energies = []
     final_nodes = []
     for n in range(n_max, n_max+1):
@@ -139,16 +145,18 @@ def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):
         print('this is iteration n', n)
         energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
         print('and this is the next energy range to try', energy_range)
+    '''
     return returned_energies, final_nodes
 
 #this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
 #then integrates and plots
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
 
-    returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
+    #returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
+    E_nl, final_node = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
 
-    E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
-    final_node = final_nodes[0]  
+    #E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
+    #final_node = final_nodes[0]  
     rmax = final_node
     print('This is rmax', rmax)
 
@@ -167,7 +175,10 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     normalised_u_squared = normalised_u**2
     fig, axs = plt.subplots(1, 2)
     axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    axs[1].scatter(r, normalised_u_squared, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[0].set_title("u_nl(r) normalised n, l:" + str(n) + " " +  str(l))
+    axs[1].scatter(r, normalised_u_squared, marker = '.')                 #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[1].set_title("u_nl(r)^2 normalised n, l:" + str(n) + " " + str(l))
+
     plt.show()
 
 #plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
@@ -183,6 +194,6 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
         
 
 
-energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
-#plotter_and_normaliser(0,0.000511 ,100000000000 , -14 * 1e-9, 1/137, 0, 1, 40215264.187867135)
+#energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
+plotter_and_normaliser(0,0.000511 ,100000000000 , -4 * 1e-9, 1/137, 0, 4, 40215264.187867135)
 
