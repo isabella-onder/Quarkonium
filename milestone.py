@@ -90,21 +90,34 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
 
-
+        '''
+        #this is ambiguous: it just could be that the given energies switch from too high for E_n to too low for E_n+1 and therefore get gaps
+        
         #if all nodes/turning_points are the same, means they are both on the same side as the solution: add small step to the far side and restart iteration
         if nodes_nb[0] == nodes_nb[1] == nodes_nb[2] and turning_points_nb[0] == turning_points_nb[1] == turning_points_nb[2]: 
             energies[2] = energies[2] + (0.1 * 1e-9)
             #print('the energies were hopefully updated', energies)
             continue
+        '''
+
+        #unless nodes/turning points correspond to what is expected for an enclosing range, it should continue
         
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
-        elif nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-            #print('E_1 and E_2 are different')
-            energies[2] = energies[1]
+        #on the condition that the energy_range indeed includes the energy we are looking for
+        if nodes_nb[0] == (n-l) and nodes_nb[2] == (n-l+1) and turning_points_nb[0] == (n-l+1) and turning_points_nb[2] == (n-l):
+            if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
+                #print('E_1 and E_2 are different')
+                energies[2] = energies[1]
 
-        elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-            #print('E_2 and E_3 are different')
-            energies[0] = energies[1]
+            elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
+                #print('E_2 and E_3 are different')
+                energies[0] = energies[1]
+
+        #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
+        else:
+            energies[0] = energies[2]
+            energies[2] = energies[2] + 0.1 * 1e-9
+            continue
 
         
 
@@ -113,6 +126,20 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
 #print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
 
+def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):             
+                                                                  
+    energy_range = [E_initial, 0, E_initial]
+    returned_energies = []
+    final_nodes = []
+    for n in range(n_max, n_max+1):
+        E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta,n, rmax)
+        print(E_n, 'hopefully the final energy')
+        returned_energies.append(E_n)
+        final_nodes.append(final_node)
+        print('this is iteration n', n)
+        energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
+        print('and this is the next energy range to try', energy_range)
+    return returned_energies, final_nodes
 
 #this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
 #then integrates and plots
@@ -151,24 +178,11 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
 #want to make it such that it finds all the energy levels on its own
 #hence will give random lower bound and once it calculates first energy, will go upwards from there
 
-def energy_range_finder(l,m_1,m_2, n_max, E_initial, alpha, beta, rmax):             
-                                                                  
-    energy_range = [E_initial, 0, E_initial]
-    returned_energies = []
-    final_nodes = []
-    for n in range(1, n_max+1):
-        E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta,n, rmax)
-        print(E_n, 'hopefully the final energy')
-        returned_energies.append(E_n)
-        final_nodes.append(final_node)
-        print('this is iteration n', n)
-        energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
-        print('and this is the next energy range to try', energy_range)
-    return returned_energies, final_nodes
+
 
         
 
 
-#energy_range_finder(0,0.000511,100000000000, 1, -13.7*1e-9,1/137,0)
-plotter_and_normaliser(0,0.000511 ,100000000000 , -14 * 1e-9, 1/137, 0, 1, 40215264.187867135)
-#40215264.187867135
+energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
+#plotter_and_normaliser(0,0.000511 ,100000000000 , -14 * 1e-9, 1/137, 0, 1, 40215264.187867135)
+

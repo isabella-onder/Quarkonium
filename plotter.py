@@ -27,13 +27,14 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
 
 def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
     E_nl = hydrogen_energies(n)
-    E_nl = -1.3613281250000004e-08
+    E_nl = -1.579999999999999e-09
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     r0 = 1e-6 * a0     # small start
     rmax = 100* a0     # extend beyond peak
+    rmax = 7678791.00312025
     print(rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
