@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 #unit converters:
 def kg_to_GeVc2(m):                 #input mass in kg
     return m * 5.610 * 10 **26
+print(kg_to_GeVc2(9.10938 * 10 ** (-31)))
 
 def m_to_GeV(r):                    #input length in m
     return r * 5.0677 * 10 ** 15
@@ -151,6 +152,8 @@ def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):
 #this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
 #then integrates and plots
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
+    mu = (1/m_1 + 1/m_2) ** (-1)
+    a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
 
     #returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
     E_nl, final_node = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
@@ -174,12 +177,18 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     print('this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
     fig, axs = plt.subplots(1, 2)
-    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    axs[0].set_title("u_nl(r) normalised n, l:" + str(n) + " " +  str(l))
-    axs[1].scatter(r, normalised_u_squared, marker = '.')                 #plot |u_nl(r)|**2 normalised (probability density function)
-    axs[1].set_title("u_nl(r)^2 normalised n, l:" + str(n) + " " + str(l))
+    axs[0].scatter(r/a0, normalised_u, marker = '.', color = "grey")                        #plot u_nl(r) normalised
+    axs[0].set_ylabel("$u_{nl}(r)$ normalised")
+    axs[1].scatter(r/a0, normalised_u_squared, marker = '.', color = "plum")                 #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[1].set_ylabel("$|u_{nl}(r)|^2$ normalised")
+    
+    fig.suptitle("Hydrogen state n = "  + str(n) + ", l =  " +  str(l))
+    fig.supxlabel("Distance in units $r/a_{0}$")
 
+    fig.tight_layout(pad=1.0)
     plt.show()
+
+    return normalised_u, normalised_u_squared, r
 
 #plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
 #plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
@@ -189,11 +198,25 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
 #want to make it such that it finds all the energy levels on its own
 #hence will give random lower bound and once it calculates first energy, will go upwards from there
 
+#energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
+#plotter_and_normaliser(0,0.000511 ,100000000000 , -4* 1e-9, 1/137, 0, 3, 40215264.187867135)
 
+def ivan_plot(quantum_number_couple_list):
+    normalised_u_array = []
+    normalised_u_squared_array = []
+    r_array = []
+    for quantum_numbers in quantum_number_couple_list:
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000511 ,100000000000 , -1.0* 1e-9, 1/137, 0, quantum_numbers[0], 40215264.187867135)
+        normalised_u_array.append(normalised_u)
+        normalised_u_squared_array.append(normalised_u_squared)
+        r_array.append(r)
+    for u, u_2, r in zip(normalised_u_array, normalised_u_squared_array, r_array):
+        plt.scatter(r/268082.760427755, u_2, marker = '.')
+    plt.show()
 
+ivan_plot([[5,0]])   
         
 
 
-#energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
-plotter_and_normaliser(0,0.000511 ,100000000000 , -4 * 1e-9, 1/137, 0, 4, 40215264.187867135)
+
 
