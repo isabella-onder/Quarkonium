@@ -27,6 +27,7 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
 
 def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
     E_nl = hydrogen_energies(n)
+    E_nl = -5.455e-10
     #mu = (1/m_1 + 1/m_2) ** (-1)
     mu = 0.0005110362180000001
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
@@ -34,7 +35,7 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
     r0 = 1e-6 * a0     # small start
-    rmax = 20* a0     # extend beyond peak
+    rmax = 70* a0     # extend beyond peak
     #rmax = 7678791.00312025
     print(rmax)
 
@@ -55,10 +56,10 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     turning_points_location = r[turning_points_index]
     turning_points_nb = len(turning_points_location)
     print(turning_points_nb, 'this is turning_points_nb')
-    print('these are the turning points location', turning_points_location)
+    print('these are the turning points location', turning_points_location/a0)
 
     print(nodes_nb, 'this is nodes nb')
-    print('these are the nodes_location', nodes_location)
+    print('these are the nodes_location', nodes_location/a0)
 
 
 
@@ -77,4 +78,4 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(1,0.000511,100000000000,2 ,1/137,0)
+sch_solver(0,0.000511,100000000000,5,1/137,0)

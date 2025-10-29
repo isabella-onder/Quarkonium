@@ -51,7 +51,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 
     #automatically finds steps where evaluates to 0 (thanks to trigger aboce)
     nodes_location = sol.t_events[0]
-    print('these are the nodes_location', nodes_location)
+    #print('these are the nodes_location', nodes_location)
     nodes_nb = len(nodes_location)
 
     #extract the final node: starts diverging from there --- NEED TO CHECK THIS QUITE BADLY
@@ -61,7 +61,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
     turning_points_location = r[turning_points_index]
-    print('these are the turning points location', turning_points_location)
+    #print('these are the turning points location', turning_points_location)
     turning_points_nb = len(turning_points_location)
 
 
@@ -71,11 +71,14 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     return nodes_nb, turning_points_nb, u, r, final_node
 
 
+#sensitivity-wise: we have an initial difference of 0.01 eV in our energy range list, we want the absolute difference to be less thatn 0.0001 and we add 0.01 if they are not 
+#in the correct range, 0.0001 if they are
+
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
-    energies[2] = energies[2] + (0.1 * 1e-9)
+    energies[2] = energies[2] + (0.01 * 1e-9)
     #print('hopefully, it has either begun or undergone a break')
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
@@ -106,23 +109,36 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
         #on the condition that the energy_range indeed includes the energy we are looking for
         if nodes_nb[0] == (n-l) and nodes_nb[2] == (n-l+1) and turning_points_nb[0] == (n-l+1) and turning_points_nb[2] == (n-l):
+            print('the if loop was initiated')
             if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-                #print('E_1 and E_2 are different')
+                print('E_1 and E_2 are different')
                 energies[2] = energies[1]
 
             elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-                #print('E_2 and E_3 are different')
+                print('E_2 and E_3 are different')
                 energies[0] = energies[1]
+
+            else:
+                print('they are in the correct range but not yet close enough')
+                energies[0] = energies[0] + 0.0001 * 1e-9
+                energies[2] = energies[2] - 0.0001 * 1e-9
 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         else:
+            print('the else loop was undergone - not yet in the correct energy range')
             energies[0] = energies[2]
-            energies[2] = energies[2] + 0.1 * 1e-9
+            energies[2] = energies[2] + 0.01 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
+            print(energies)
             continue
 
         
-
+    print('this is final node', final_node)
     return energies[1], final_node
+
+
+#energy_finder(0,0.000511,100000000, [-6e-10, 0, -5.9e-10], 1/137, 0, 1, 70 * 268082.760427755 )
+#energy_finder(0,0.000511,100000000, [-5.9e-09, 0, -5.8e-09], 1/137, 0, 2, 70 * 268082.760427755 )
+
     
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
 #print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
@@ -147,7 +163,7 @@ def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):
         energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
         print('and this is the next energy range to try', energy_range)
     '''
-    return returned_energies, final_nodes
+    #return returned_energies, final_nodes
 
 #this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
 #then integrates and plots
@@ -206,7 +222,7 @@ def ivan_plot(quantum_number_couple_list):
     normalised_u_squared_array = []
     r_array = []
     for quantum_numbers in quantum_number_couple_list:
-        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000511 ,100000000000 , -1.0* 1e-9, 1/137, 0, quantum_numbers[0], 40215264.187867135)
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000511 ,100000000000 , -13.7* 1e-9, 1/137, 0, quantum_numbers[0], 40215264.187867135)
         normalised_u_array.append(normalised_u)
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
@@ -214,7 +230,7 @@ def ivan_plot(quantum_number_couple_list):
         plt.scatter(r/268082.760427755, u_2, marker = '.')
     plt.show()
 
-ivan_plot([[5,0]])   
+ivan_plot([[5,0]])
         
 
 
