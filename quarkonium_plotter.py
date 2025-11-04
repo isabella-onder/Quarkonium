@@ -18,26 +18,25 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
     du_dr = v                               
-    dv_dr = (l*(l+1))/(r**2) * u - (2 * mu * (E_nl - ((-alpha)/(r) + beta*r))) * u  #hmm what is beta and how do I find it + removed 4/3 for Hydrogen testing
+    dv_dr = (l*(l+1))/(r**2) * u - (2 * mu * (E_nl - ((-4*alpha)/(3*r) + beta*r))) * u  #hmm what is beta and how do I find it + removed 4/3 for Hydrogen testing
     return [du_dr, dv_dr] 
 
 def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
-    E_nl = hydrogen_energies(n)
-    E_nl = -1.37e-08
+def sch_solver(l,m_1,m_2,  alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
+    E_nl = 0.9575
+    #E_nl = 0.73471
     #mu = (1/m_1 + 1/m_2) ** (-1)
-    mu = 0.0005110362180000001
+    mu = 1.34/2
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
-    a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
+    a0 = 268101.76125244756  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
-    r0 = 1e-6 * a0     # small start
-    rmax = 70* a0     # extend beyond peak
-    #rmax = 7678791.00312025
-    print(rmax)
+    r0 = 1e-8 * a0     # small start
+    rmax = 8   # extend beyond peak
+    print('this is rmax',rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -72,10 +71,13 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
     print('this is normalised check: hopefully one', normalised_check)
 
-    axs[0].scatter(r/a0, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    axs[1].scatter(r/a0, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
+    axs[1].scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(0,0.000511,100000000000,5,1/137,0)
+sch_solver(0,1.34,1.34,0.40,0.195)
+
+#plan: check by inputting correct values that it plots correct thing
+#accordingly, correct quarkonium and beta. Also, make sure that beta finder is indeed appropriate

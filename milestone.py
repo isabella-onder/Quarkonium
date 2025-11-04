@@ -40,6 +40,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
+    print('this is a0', a0)
     r0 = 1e-6 * a0     # small start
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp

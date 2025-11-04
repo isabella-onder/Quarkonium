@@ -30,7 +30,7 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
     du_dr = v                               
-    dv_dr = (l*(l+1))/(r**2) * u - (2 * mu * (E_nl - ((-4*alpha)/(3*r) + beta*r))) * u  
+    dv_dr = (l*(l+1))/(r**2) * u - (2 * mu * (E_nl - ((-4*alpha)/(3*r) + beta*r))) * u  #hmm what is beta and how do I find it + removed 4/3 for Hydrogen testing
     return [du_dr, dv_dr] 
 
 def zero_crossing(r, Y, l, mu, E, alpha, beta):
@@ -41,9 +41,9 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax): #passing all system parameter
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
-    #a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
-    a0 = 268101.76125244756
-    r0 = 1e-10 * a0     # small start
+    a0 = 268101.76125244756 # Bohr radius in GeV^-1
+    #a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1 that was the formula for H
+    r0 = 1e-9 * a0     # small start
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -75,21 +75,21 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax): #passing all system parameter
 
 
 
-def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with energy range boundaries within which to search
+def energy_finder(l, m_1, m_2, energy, alpha, betas, rmax):   #input list with energy range boundaries within which to search
     #energies[2] = energies[2] + (0.1 * 1e-9)
     #print('hopefully, it has either begun or undergone a break')
-    while abs(energies[0]-energies[2]) > 0.0001:
+    while abs(betas[0]-betas[2]) > 0.0001:
 
-        E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
-        energies = [energies[0], E_2 , energies[-1]]
-        print(energies)
+        beta_2 = (betas[0] + betas[-1])/2            #bisecting energy range to start iterating
+        betas = [betas[0], beta_2 , betas[-1]]
+        print(betas)
     
 
         turning_points_nb = []
         nodes_nb = []  
 
-        for E_nl in energies:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
-            n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
+        for beta in betas:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
+            n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, energy, alpha, beta, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
@@ -104,17 +104,16 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
         if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
             #print('E_1 and E_2 are different')
-            energies[2] = energies[1]
+            betas[2] = betas[1]
 
         elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
             #print('E_2 and E_3 are different')
-            energies[0] = energies[1]
+            betas[0] = betas[1]
 
         else:
                 print('they are in the correct range but not yet close enough') #make sure that this really is the only scenario
-                energies[0] = energies[0] + 0.00001 
-                energies[2] = energies[2] - 0.00001 
-
+                betas[0] = betas[0] + 0.0001 
+                betas[2] = betas[2] - 0.0001 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         #else:
             #print('the else loop was undergone - not yet in the correct energy range')
@@ -125,24 +124,29 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
 
         
 
-    return energies[1], final_node
+    return betas[1], final_node
     
-
+#print(sch_solver(0,0.000511,100000000000,1,1/137,0))
+#print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
 
 
 #this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
 #then integrates and plots
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
+    
     a0 = 268101.76125244756
-    returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
 
-    E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
-    final_node = final_nodes[0]  
-    rmax = final_node
+    returned_betas, _ = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
+
+    beta = returned_betas[0] #for now just try with E_1 and hence final_node_1
+    #print(final_nodes)
+    #final_node = final_nodes[0]  
+    rmax = 12
     print('This is rmax', rmax)
 
-    print('This is the estimated E_nl', E_nl)
-    nodes_nb, turning_points_nb, u, r, final_node = sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
+    print('This is the estimated beta', beta)
+    print('these are the values going in',l, m_1, m_2, E_initial, alpha, beta, rmax )
+    nodes_nb, turning_points_nb, u, r, final_node = sch_solver(l, m_1, m_2, E_initial, alpha, beta, rmax)
     print('this is nodes_nb and turning points nb of our plotted one', nodes_nb, turning_points_nb)
     #plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
     #plt.show()
@@ -155,29 +159,34 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
     print('this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
     fig, axs = plt.subplots(1, 2)
-    axs[0].scatter(r/a0, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    axs[1].scatter(r/a0, normalised_u_squared, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
+    axs[1].scatter(r, normalised_u_squared, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
+
+#plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+#plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
 
 
 #attempt to get it to loop
 #want to make it such that it finds all the energy levels on its own
 #hence will give random lower bound and once it calculates first energy, will go upwards from there
 
-def energy_range_finder(l,m_1,m_2, E_range, alpha, beta, rmax):                                                                              
-    energy_range = E_range
+def energy_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax):                                                                              
+    #energy_range = E_range
     returned_energies = []
     final_nodes = []
-
-    E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta, rmax)
-    print(E_n, 'hopefully the final energy')
-    returned_energies.append(E_n)
-    final_nodes.append(final_node)        
-    print('and this is the next energy range to try', energy_range)
+    for n in range(1, 2):
+        beta, final_node = energy_finder(l, m_1, m_2, E, alpha, beta_range, rmax)
+        print(beta, 'hopefully the final beta')
+        returned_energies.append(beta)
+        final_nodes.append(final_node)
+        print('this is iteration n', n)
+        #energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
+        print('and this is the next energy range to try', beta)
     return returned_energies, final_nodes
 
         
-plotter_and_normaliser(0,1.34,1.34,[0.8, 0,1],0.40,0.195, 20)
+plotter_and_normaliser(0,1.34,1.34, 0.388 ,0.40,[0.10,0,0.20], 10)
 
 #M = 3.068
 
