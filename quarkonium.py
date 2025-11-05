@@ -27,22 +27,25 @@ def hydrogen_energies(n):               #for convenience: exact energy calculato
     return E_n
 
 
-def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
-    u, v = Y                                #unpacking y since two equations (one second order split into two first order)
+#defining my system of differential equations: taking all parameters as input
+#unpacking y since two equations (one second order split into two first order)
+def system(r, Y, l, mu, E_nl, alpha, beta): 
+    u, v = Y                                
     du_dr = v                               
     dv_dr = (l*(l+1))/(r**2) * u - (2 * mu * (E_nl - ((-4*alpha)/(3*r) + beta*r))) * u  
     return [du_dr, dv_dr] 
 
+#trigger function to find when u == 0, called by solve_ivp
 def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
-    return u     #trigger function to find when u == 0, called by solve_ivp
+    return u     
 
-def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax): #passing all system parameters as arguments to make adaptable code for different particles
+#passing all system parameters as arguments to make adaptable code for different particles
+def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax): 
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
-    #a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
-    a0 = 268101.76125244756
+    a0 = 268101.76125244756 # Bohr radius in GeV^-1
     r0 = 1e-10 * a0     # small start
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -68,8 +71,6 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax): #passing all system parameter
     turning_points_nb = len(turning_points_location)
 
 
-    #plt.scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
-    #plt.show()
 
     return nodes_nb, turning_points_nb, u, r, final_node
 
@@ -88,40 +89,28 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
         turning_points_nb = []
         nodes_nb = []  
 
-        for E_nl in energies:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
+        #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
+        for E_nl in energies:  
             n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
 
-
-        #if all nodes/turning_points are the same, means they are both on the same side as the solution: add small step to the far side and restart iteration
-        #if nodes_nb[0] == nodes_nb[1] == nodes_nb[2] and turning_points_nb[0] == turning_points_nb[1] == turning_points_nb[2]: 
-        #    energies[2] = energies[2] + (0.1 * 1e-9)
-            #print('the energies were hopefully updated', energies)
-        #    continue
         
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
         if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-            #print('E_1 and E_2 are different')
-            energies[2] = energies[1]
 
+            energies[2] = energies[1]
         elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
             #print('E_2 and E_3 are different')
             energies[0] = energies[1]
 
         else:
-                print('they are in the correct range but not yet close enough') #make sure that this really is the only scenario
-                energies[0] = energies[0] + 0.00001 
-                energies[2] = energies[2] - 0.00001 
+                print('something is wrong: the range is incorrect (or perhaps they are not yet close enough?)') #make sure that this really is the only scenario
+                return('INVALID E_N', 'SO NO NODE')
+                break
 
-        #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
-        #else:
-            #print('the else loop was undergone - not yet in the correct energy range')
-            #energies[0] = energies[2]
-            #energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
-            #print('these are the energies after the else loop', energies)
-            #continue
+    
 
         
 
@@ -134,57 +123,38 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
 #then integrates and plots
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
     a0 = 268101.76125244756
-    returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
-
-    E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
-    final_node = final_nodes[0]  
-    rmax = final_node
+    E_nl, rmax = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
     print('This is rmax', rmax)
-
     print('This is the estimated E_nl', E_nl)
+
+    #plotting it one final time with the estimated E_nl and with rmax
     nodes_nb, turning_points_nb, u, r, final_node = sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
     print('this is nodes_nb and turning points nb of our plotted one', nodes_nb, turning_points_nb)
-    #plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
-    #plt.show()
-  
 
-    integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
+  
+    #evaluating integral over all u_nl to then normalise by result
+    integral = sp.integrate.simpson(u**2,r)                           
     print('this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
     print('this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
+
     fig, axs = plt.subplots(1, 2)
-    axs[0].scatter(r/a0, normalised_u, marker = '.')                        #plot u_nl(r) normalised
+    axs[0].scatter(r/a0, normalised_u, marker = '.')                             #plot u_nl(r) normalised
     axs[1].scatter(r/a0, normalised_u_squared, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
 
-#attempt to get it to loop
-#want to make it such that it finds all the energy levels on its own
-#hence will give random lower bound and once it calculates first energy, will go upwards from there
 
+#just the function that does all the calling and final returning
 def energy_range_finder(l,m_1,m_2, E_range, alpha, beta, rmax):                                                                              
     energy_range = E_range
-    returned_energies = []
-    final_nodes = []
-
     E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta, rmax)
-    print(E_n, 'hopefully the final energy')
-    returned_energies.append(E_n)
-    final_nodes.append(final_node)        
+    print(E_n, 'hopefully the final energy')    
     print('and this is the next energy range to try', energy_range)
-    return returned_energies, final_nodes
+    return E_n, final_node
 
         
-plotter_and_normaliser(0,1.34,1.34,[0.8, 0,1],0.40,0.195, 20)
+plotter_and_normaliser(0,1.34,1.34,[-1, 0,1],0.40,0.195,30)
 
-#M = 3.068
-
-#energy_range_finder(0,0.000511,100000000000, 1, -13.7*1e-9,1/137,0)
-#def plotter_and_normaliser(l, m_1, m_2, E_range, alpha, beta, rmax):
-#plotter_and_normaliser(1,1.34 ,1.34 , , 0.40, 0, 3, 40215264.187867135)
-#40215264.187867135
-
-#need to take all the bits of final  milestone and just make sure that for quarkonium, it does not 
-#require previous knowledhe om number of turns and noes (so keen the energy cjoice as anove nit omplement the rest)
