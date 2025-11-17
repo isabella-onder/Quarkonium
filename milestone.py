@@ -5,6 +5,7 @@ import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 #important to note: using h_bar = c = 1
 
 
@@ -40,10 +41,10 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
-    print('this is a0', a0)
+    #print('this is a0', a0)
     r0 = 1e-6 * a0     # small start
 
-    r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,2010)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
@@ -85,7 +86,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
-        print('these are the energies at the start of the while loop', energies)
+        #print('these are the energies at the start of the while loop', energies)
     
 
         turning_points_nb = []
@@ -95,7 +96,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
             n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
-        print (nodes_nb, turning_points_nb)
+        #print (nodes_nb, turning_points_nb)
 
         '''
         #this is ambiguous: it just could be that the given energies switch from too high for E_n to too low for E_n+1 and therefore get gaps
@@ -114,11 +115,11 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
         if nodes_nb[0] == (n-l) and nodes_nb[2] == (n-l+1) and turning_points_nb[0] == (n-l+1) and turning_points_nb[2] == (n-l):
             print('the if loop was initiated')
             if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-                print('E_1 and E_2 are different')
+                #print('E_1 and E_2 are different')
                 energies[2] = energies[1]
 
             elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-                print('E_2 and E_3 are different')
+                #print('E_2 and E_3 are different')
                 energies[0] = energies[1]
 
             else:
@@ -128,14 +129,14 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         else:
-            print('the else loop was undergone - not yet in the correct energy range')
+            #print('the else loop was undergone - not yet in the correct energy range')
             energies[0] = energies[2]
             energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
-            print('these are the energies after the else loop', energies)
+            #print('these are the energies after the else loop', energies)
             continue
 
         
-    print('this is final node', final_node)
+    #print('this is final node', final_node)
     return energies[1], final_node
 
 
@@ -193,7 +194,7 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     print('this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
-    print('this is normalised check: hopefully one', normalised_check)
+    #print('this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
     fig, axs = plt.subplots(1, 2)
     axs[0].scatter(r/a0, normalised_u, marker = '.', color = "grey")                        #plot u_nl(r) normalised
@@ -229,11 +230,25 @@ def plot(quantum_number_couple_list):
         normalised_u_array.append(normalised_u)
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
-    for u, u_2, r in zip(normalised_u_array, normalised_u_squared_array, r_array):
-        plt.scatter(r/268082.760427755, u_2, marker = '.')
+    colours = ['grey', '#B1D0ED', '#156082']
+    energies = ['$u_{1,0}$', '$u_{2,0}$', '$u_{2,1}$']
+    
+    fig, ax = plt.subplots()
+    for u, u_2, r, colour, e in zip(normalised_u_array, normalised_u_squared_array, r_array, colours, energies):
+        plt.scatter(r/268082.760427755, u_2, marker = '.', color = colour, s = 5, label = e)
+    ax.set_xlim([0, 15])
+    plt.xlabel('Separation ($a_0$)', size = 22)
+    plt.ylabel('$|u_{nl}(r)|^2$ ($10^{-6}$)', size = 22)
+    plt.xticks(size = 15)
+    plt.yticks(size = 15)
+    #ax.ticklabel_format(style='plain')
+    ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+    plt.legend(markerscale=10, fontsize=17)
     plt.show()
+  
 
-plot([[1,0], [2,0],[2,1]])
+plot([ [1,0], [2,0], [2,1]])
+
         
 
 
