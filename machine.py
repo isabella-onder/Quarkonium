@@ -26,8 +26,6 @@ real_energy= {
     (2,0): 1.1,
 }
 
-def charmonium(n,l):
-    return energy_range_finder(l,m_c,m_c,get_energy_range(n,l), alpha, beta, rmax)
 
 def get_energy_range(n, l):
     # Lookup the energy range for the given n and l
@@ -35,5 +33,11 @@ def get_energy_range(n, l):
         return energy_ranges[(n, l)]
     except KeyError:
         raise ValueError(f"No energy range found for n={n}, l={l}. Please check the input.")
+    
+
+def charmonium(n,l):
+    return energy_range_finder(l,m_c,m_c,get_energy_range(n,l), alpha, beta, rmax)
+
+
     
 charmonium(1,0)
