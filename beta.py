@@ -139,7 +139,7 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
     fig, axs = plt.subplots(1, 2)
     axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
     axs[1].scatter(r, normalised_u_squared, marker = '.')                #plot |u_nl(r)|**2 normalised (probability density function)
-    plt.show()
+    #plt.show()
 
 
 
@@ -152,7 +152,10 @@ def beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax):
     returned_energies.append(beta)
     return returned_energies
 
-        
+     
 #plotter_and_normaliser(0,1.34,1.34, 0.388 ,0.40,[0.10,0,0.20], 10)
-beta_range_finder(0,1.34,1.34, 0.388 ,0.40,[0.10,0,0.20], 10)
+
+
+#beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax)
+beta_range_finder(0,1.27,1.27, 0.4381 ,0.40,[0.10,0,0.25], 10)
 

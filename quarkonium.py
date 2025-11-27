@@ -156,5 +156,6 @@ def energy_range_finder(l,m_1,m_2, E_range, alpha, beta, rmax):
     return E_n, final_node
 
         
-plotter_and_normaliser(0,1.34,1.34,[-1, 0,1],0.40,0.195,30)
+#plotter_and_normaliser(1,1.27,1.27,[0, 0.6,1],0.40,0.2100830078125,30)
+#energy_range_finder(0,1.27,1.27,[0.8, 0.6,1.2],0.40,0.2100830078125,30)
 
