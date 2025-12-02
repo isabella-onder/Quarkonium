@@ -174,6 +174,7 @@ def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     mu = (1/m_1 + 1/m_2) ** (-1)
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
+    print('this is a0', a0)
 
     #returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
     E_nl, final_node = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
@@ -206,7 +207,7 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     fig.supxlabel("Distance in units $r/a_{0}$")
 
     fig.tight_layout(pad=1.0)
-    plt.show()
+    #plt.show()
 
     return normalised_u, normalised_u_squared, r
 
@@ -231,20 +232,25 @@ def plot(quantum_number_couple_list):
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
     colours = ['grey', '#B1D0ED', '#156082']
-    energies = ['$u_{1,0}$', '$u_{2,0}$', '$u_{2,1}$']
+    energies = ['$|u_{1,0}|^2$', '$|u_{2,0}|^2$', '$|u_{2,1}|^2$']
     
     fig, ax = plt.subplots()
     for u, u_2, r, colour, e in zip(normalised_u_array, normalised_u_squared_array, r_array, colours, energies):
-        plt.scatter(r/268082.760427755, u_2, marker = '.', color = colour, s = 5, label = e)
+        plt.scatter(r/268082.760427755, u_2 * 10**6, marker = '.', color = colour, s = 9, label = e)
     ax.set_xlim([0, 15])
-    plt.xlabel('Separation ($a_0$)', size = 22)
-    plt.ylabel('$|u_{nl}(r)|^2$ ($10^{-6}$)', size = 22)
+    plt.xlabel('Separation $r$ ($a_0$)', size = 18)
+    plt.ylabel('$|u_{nl}(r)|^2$ ($10^{-6}$)', size = 18)
     plt.xticks(size = 15)
     plt.yticks(size = 15)
+    plt.tick_params(which = 'major', bottom = True, left = True,  direction = 'in') 
+
     #ax.ticklabel_format(style='plain')
     ax.yaxis.set_major_locator(plt.MaxNLocator(4))
-    plt.legend(markerscale=10, fontsize=17)
+    plt.legend(markerscale=15, fontsize=20)
+    #plt.savefig("hydrogen_plots.svg", bbox_inches = 'tight')
     plt.show()
+
+    return(normalised_u_array, r_array)
   
 
 plot([ [1,0], [2,0], [2,1]])

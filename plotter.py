@@ -99,8 +99,9 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
     fig, ax = plt.subplots()
-    labels = ['+0.1eV', '$E_{3,0}$ (analytic)', '-0.1eV'] #too high, perfect, too low
-    colours = ['darkseagreen', 'grey', 'peru']
+    labels = ['+0.1eV', '$E_{3,0}$ analytic', '-0.1eV'] #too high, perfect, too low
+    colours = ['#B1D0ED', 'grey', '#156082']
+    #colours = ['darkseagreen', 'grey', 'peru']
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     for e,colour,label in zip(E_list, colours,labels):
         print('this is the current e', e)
@@ -135,14 +136,17 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
         print('this is normalised check: hopefully one', normalised_check)
 
             
-        plt.scatter(r/a0, normalised_u, marker = '.', s = 5, color = colour, label=label)                     #plot |u_nl(r)|**2 normalised (probability density function)
+        plt.scatter(r/a0, normalised_u * 10**4, marker = '.', s = 7, color = colour, label=label)                     #plot |u_nl(r)|**2 normalised (probability density function)
     ax.axhline(y=0, color='grey', linestyle='--')
-    plt.xlabel('Separation ($a_0$)', size = 25)
-    plt.ylabel('$|u_{nl}(r)|$', size = 25)
-    plt.xticks(size = 15)
-    plt.yticks(size = 15)
-    plt.legend(markerscale=10, fontsize=17)
-    plt.show()
+    plt.xlabel('Separation $r$ ($a_0$)', size = 18)
+    plt.ylabel('$u_{nl}(r)$  $(10^{-4})$', size = 18)
+    plt.xticks(size = 18)
+    plt.yticks(size = 18)
+    plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
+    plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
+    plt.savefig("divergence_plot.svg", bbox_inches = 'tight')
+    #plt.show()
+    
 
     return(nodes_nb, turning_points_nb, u, r)
 
