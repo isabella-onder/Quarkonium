@@ -146,7 +146,7 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
     plt.savefig("divergence_plot.svg", bbox_inches = 'tight')
     #plt.show()
-    
+    print(nodes_nb, turning_points_nb)
 
     return(nodes_nb, turning_points_nb, u, r)
 

@@ -79,7 +79,8 @@ def comparator_with_residuals():
     print(axs_new.shape)
     fig2, ax_res = plt.subplots()
     for u_num,  u_theo, color, i, r_num in zip(numerical_array, theoretical_array, colours, [0,1,2], r_num_array):
-        residual = [num - theo for num, theo in zip(u_num, u_theo)]
+        residual = [(num - theo)/theo for num, theo in zip(u_num, u_theo)]
+        #print('these are residual', residual)
     
 
         u_num_squared = [u**2 for u in u_num]
@@ -92,7 +93,8 @@ def comparator_with_residuals():
         axs_new[2].scatter(r_num/a0, residual, color = color,  marker = '.', s = 1)
 
         #plotting blow up of residuals (at the start before it starts proper diverging)
-        ax_res.scatter(r_num[0:int(len(r_num)/4)]/a0, residual[0:int(len(r_num)/4)], color = color, marker = '.', s = 1)
+        ax_res.scatter(r_num[10:int(len(r_num)/4)]/a0, residual[10:int(len(r_num)/4)], color = color, marker = '.', s = 1)
+        #ax_res.set_ylim(np.min(residual), np.max(residual))
 
     #plt.show()
     axs_new[0].set_ylabel('Numerical')

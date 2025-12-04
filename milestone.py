@@ -81,7 +81,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 
 def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
     energies[2] = energies[2] + (0.01 * 1e-9)
-    #print('hopefully, it has either begun or undergone a break')
+    print('hopefully, it has either begun or undergone a break')
     while abs(energies[0]-energies[2]) > 1e-9 * 0.001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
@@ -96,7 +96,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
             n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
-        #print (nodes_nb, turning_points_nb)
+        print (nodes_nb, turning_points_nb)
 
         '''
         #this is ambiguous: it just could be that the given energies switch from too high for E_n to too low for E_n+1 and therefore get gaps
@@ -115,24 +115,27 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
         if nodes_nb[0] == (n-l) and nodes_nb[2] == (n-l+1) and turning_points_nb[0] == (n-l+1) and turning_points_nb[2] == (n-l):
             print('the if loop was initiated')
             if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-                #print('E_1 and E_2 are different')
+                
                 energies[2] = energies[1]
+                print('E_1 and E_2 are different', energies)
 
             elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-                #print('E_2 and E_3 are different')
+                
                 energies[0] = energies[1]
+                print('E_2 and E_3 are different', energies)
 
             else:
-                print('they are in the correct range but not yet close enough') #make sure that this really is the only scenario
+                print('they are in the correct range but not yet close enough', energies) #make sure that this really is the only scenario
                 energies[0] = energies[0] + 0.0001 * 1e-9
                 energies[2] = energies[2] - 0.0001 * 1e-9
+                
 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         else:
-            #print('the else loop was undergone - not yet in the correct energy range')
+            print('the else loop was undergone - not yet in the correct energy range')
             energies[0] = energies[2]
             energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
-            #print('these are the energies after the else loop', energies)
+            print('these are the energies after the else loop', energies)
             continue
 
         
@@ -227,7 +230,7 @@ def plot(quantum_number_couple_list):
     normalised_u_squared_array = []
     r_array = []
     for quantum_numbers in quantum_number_couple_list:
-        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000511 ,100000000000 , -13.9* 1e-9, 1/137, 0, quantum_numbers[0], 40215264.187867135)
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,100000000000 , -13.62* 1e-9, 1/137, 0, quantum_numbers[0],40215264.187867135 )
         normalised_u_array.append(normalised_u)
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
@@ -248,12 +251,12 @@ def plot(quantum_number_couple_list):
     ax.yaxis.set_major_locator(plt.MaxNLocator(4))
     plt.legend(markerscale=15, fontsize=20)
     #plt.savefig("hydrogen_plots.svg", bbox_inches = 'tight')
-    plt.show()
+    #plt.show()
 
     return(normalised_u_array, r_array)
   
 
-plot([ [1,0], [2,0], [2,1]])
+
 
         
 
