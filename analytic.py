@@ -53,7 +53,7 @@ def analytic(r_num_array):
     plt.plot(r_10/a0, u_10_squared, color = 'grey')
     plt.plot(r_20/a0, u_20_squared, color = '#B1D0ED')
     plt.plot(r_21/a0, u_21_squared, color = '#156082')
-    #plt.savefig("analytic_plots.svg", bbox_inches = 'tight')
+    #plt.savefig("figs/analytic_plots.svg", bbox_inches = 'tight')
     #plt.show()
 
     #theoretical_array = np.array(u_10_squared, u_20_squared, u_21_squared)
@@ -91,19 +91,19 @@ def comparator_with_residuals():
         axs_new[0].scatter(r_num/a0, u_num, color = color, marker = '.')
         axs_new[1].scatter(r_num/a0, u_theo, color = color, marker = '.')
         axs_new[2].scatter(r_num/a0, residual, color = color,  marker = '.', s = 1)
-
+        axs_new[2].set_ylim(-0.4, 0.4)
         #plotting blow up of residuals (at the start before it starts proper diverging)
         ax_res.scatter(r_num[10:int(len(r_num)/4)]/a0, residual[10:int(len(r_num)/4)], color = color, marker = '.', s = 1)
-        #ax_res.set_ylim(np.min(residual), np.max(residual))
+        ax_res.set_ylim(-0.001, 0.001)
 
     #plt.show()
     axs_new[0].set_ylabel('Numerical')
     axs_new[1].set_ylabel('Analytic')
-    axs_new[2].set_ylabel('Residuals \n ($u_{num} - u_{theo}$)')
-    ax_res.set_ylabel('Residuals zoom \n ($u_{num} - u_{theo}$)')
+    axs_new[2].set_ylabel('Fractional difference \n $ (u_{num} - u_{theo})/u_{theo}$')
+    ax_res.set_ylabel('Fractional difference zoom \n $ (u_{num} - u_{theo})/u_{theo}$')
     axs_new[2].set_xlabel('Separation r in $a_0$')
-    fig1.savefig('comparator.svg', bbox_inches = 'tight')
-    fig2.savefig('residual_zoom.svg', bbox_inches = 'tight')
+    fig1.savefig('figs/comparator.svg', bbox_inches = 'tight')
+    fig2.savefig('figs/residual_zoom.svg', bbox_inches = 'tight')
 
 comparator_with_residuals()
         

@@ -137,7 +137,7 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
     
     normalised_u_squared = normalised_u**2
     fig, axs = plt.subplots(1, 2)
-    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
+    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised (radial wavefunction)
     axs[1].scatter(r, normalised_u_squared, marker = '.')                #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 

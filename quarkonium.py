@@ -48,7 +48,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
     a0 = 268101.76125244756 # Bohr radius in GeV^-1
     r0 = 1e-10 * a0     # small start
 
-    r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,15000)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
@@ -57,7 +57,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
 
     #automatically finds steps where evaluates to 0 (thanks to trigger aboce)
     nodes_location = sol.t_events[0]
-    print('these are the nodes_location', nodes_location)
+    #print('these are the nodes_location', nodes_location)
     nodes_nb = len(nodes_location)
 
     #extract the final node: starts diverging from there --- NEED TO CHECK THIS QUITE BADLY
@@ -67,7 +67,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
     #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
     turning_points_location = r[turning_points_index]
-    print('these are the turning points location', turning_points_location)
+    #print('these are the turning points location', turning_points_location)
     turning_points_nb = len(turning_points_location)
 
 
@@ -91,7 +91,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
 
         #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
         for E_nl in energies:  
-            n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
+            n_nb, tp_nb, u, r, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
@@ -106,15 +106,15 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
             energies[0] = energies[1]
 
         else:
-                print('something is wrong: the range is incorrect (or perhaps they are not yet close enough?)') #make sure that this really is the only scenario
-                return('INVALID E_N', 'SO NO NODE')
-                break
+            print('something is wrong: the range is incorrect (or perhaps they are not yet close enough?)') #make sure that this really is the only scenario
+            return('INVALID E_N', 'SO NO NODE', 'oops', 'oops')
+            break
 
     
 
         
 
-    return energies[1], final_node
+    return energies[1], final_node, u, r
     
 
 
@@ -123,7 +123,11 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
 #then integrates and plots
 def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
     a0 = 268101.76125244756
-    E_nl, rmax = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
+    E_nl, rmax, u, r = energy_range_finder(l,m_1,m_2, E_initial, alpha, beta, rmax)
+
+    if E_nl == 'INVALID E_N':
+        return 'nope'
+    
     print('This is rmax', rmax)
     print('This is the estimated E_nl', E_nl)
 
@@ -150,12 +154,14 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, rmax):
 #just the function that does all the calling and final returning
 def energy_range_finder(l,m_1,m_2, E_range, alpha, beta, rmax):                                                                              
     energy_range = E_range
-    E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta, rmax)
+    E_n, final_node, u, r = energy_finder(l, m_1, m_2, energy_range, alpha, beta, rmax)
     print(E_n, 'hopefully the final energy')    
-    print('and this is the next energy range to try', energy_range)
-    return E_n, final_node
+    #print('and this is the next energy range to try', energy_range)
+    return E_n, final_node, u, r
 
         
 #plotter_and_normaliser(1,1.27,1.27,[0, 0.6,1],0.40,0.2100830078125,30)
 #energy_range_finder(0,1.27,1.27,[0.8, 0.6,1.2],0.40,0.2100830078125,30)
+
+plotter_and_normaliser(0,4.183,4.183,[1.4, 0,1.8],0.28,0.2100830078125,60)
 

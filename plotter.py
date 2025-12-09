@@ -33,11 +33,11 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
-    print(a0, 'this is a0')
+    #print(a0, 'this is a0')
     r0 = 1e-6 * a0     # small start
     rmax = 70* a0     # extend beyond peak
     #rmax = 7678791.00312025
-    print(rmax)
+    #print(rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -55,11 +55,11 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
     turning_points_location = r[turning_points_index]
     turning_points_nb = len(turning_points_location)
-    print(turning_points_nb, 'this is turning_points_nb')
-    print('these are the turning points location', turning_points_location/a0)
+    #print(turning_points_nb, 'this is turning_points_nb')
+    #print('these are the turning points location', turning_points_location/a0)
 
-    print(nodes_nb, 'this is nodes nb')
-    print('these are the nodes_location', nodes_location/a0)
+    #print(nodes_nb, 'this is nodes nb')
+    #print('these are the nodes_location', nodes_location/a0)
 
 
 
@@ -144,7 +144,7 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     plt.yticks(size = 18)
     plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
     plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
-    plt.savefig("divergence_plot.svg", bbox_inches = 'tight')
+    #plt.savefig("figs/divergence_plot.svg", bbox_inches = 'tight')
     #plt.show()
     print(nodes_nb, turning_points_nb)
 

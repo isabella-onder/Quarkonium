@@ -19,11 +19,15 @@ def m_to_GeV(r):                    #input length in m
 
 
 
-def hydrogen_energies(n):               #for convenience: exact energy calculator for Hydrogen given n
+def hydrogen_energies(n):   
+                #for convenience: exact energy calculator for Hydrogen given n
     mu = 0.000511 #electron mass in GeV/c^-2
+    mu = (1/0.000511 + 1/0.93827)**(-1)
     alpha = 1/137 
     E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
     return E_n
+#print('this is hydrogen energies ', hydrogen_energies(1), hydrogen_energies(2), hydrogen_energies(3), hydrogen_energies(4))
+
 
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
@@ -44,7 +48,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     #print('this is a0', a0)
     r0 = 1e-6 * a0     # small start
 
-    r_eval = np.linspace(r0,rmax,2010)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,20100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
@@ -82,7 +86,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
     energies[2] = energies[2] + (0.01 * 1e-9)
     print('hopefully, it has either begun or undergone a break')
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.000001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
@@ -117,25 +121,25 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
             if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
                 
                 energies[2] = energies[1]
-                print('E_1 and E_2 are different', energies)
+                #print('E_1 and E_2 are different', energies)
 
             elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
                 
                 energies[0] = energies[1]
-                print('E_2 and E_3 are different', energies)
+                #print('E_2 and E_3 are different', energies)
 
             else:
-                print('they are in the correct range but not yet close enough', energies) #make sure that this really is the only scenario
+                #print('they are in the correct range but not yet close enough', energies) #make sure that this really is the only scenario
                 energies[0] = energies[0] + 0.0001 * 1e-9
                 energies[2] = energies[2] - 0.0001 * 1e-9
                 
 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         else:
-            print('the else loop was undergone - not yet in the correct energy range')
+            #print('the else loop was undergone - not yet in the correct energy range')
             energies[0] = energies[2]
-            energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
-            print('these are the energies after the else loop', energies)
+            energies[2] = energies[2] + 0.01 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
+            #print('these are the energies after the else loop', energies)
             continue
 
         
@@ -230,7 +234,7 @@ def plot(quantum_number_couple_list):
     normalised_u_squared_array = []
     r_array = []
     for quantum_numbers in quantum_number_couple_list:
-        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,100000000000 , -13.62* 1e-9, 1/137, 0, quantum_numbers[0],40215264.187867135 )
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,0.93827 , -1.62* 1e-9, 1/137, 0, quantum_numbers[0],40215264.187867135 )
         normalised_u_array.append(normalised_u)
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
@@ -250,12 +254,13 @@ def plot(quantum_number_couple_list):
     #ax.ticklabel_format(style='plain')
     ax.yaxis.set_major_locator(plt.MaxNLocator(4))
     plt.legend(markerscale=15, fontsize=20)
-    #plt.savefig("hydrogen_plots.svg", bbox_inches = 'tight')
+    #plt.savefig("figs/hydrogen_plots.svg", bbox_inches = 'tight')
     #plt.show()
 
     return(normalised_u_array, r_array)
   
-
+plot([[4,0]])
+print(hydrogen_energies(4))
 
 
         
