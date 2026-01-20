@@ -51,9 +51,16 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     r_eval = np.linspace(r0,rmax,20100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-    sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
+    sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'DOP853') 
     u, v = sol.y[0], sol.y[1] 
     r = sol.t
+
+    #making it print v as a check for my quarkonium: why do I get different v depending on initial condition
+    #print('the first two and last v', v[0], v[1], v[-1])
+
+    #making it print the reason it terminated
+    #reason = sol.message
+    #print('this is the reason it terminated', reason)
 
     #automatically finds steps where evaluates to 0 (thanks to trigger aboce)
     nodes_location = sol.t_events[0]
@@ -86,7 +93,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
 def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
     energies[2] = energies[2] + (0.01 * 1e-9)
     print('hopefully, it has either begun or undergone a break')
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.000001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
@@ -130,15 +137,15 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 
             else:
                 #print('they are in the correct range but not yet close enough', energies) #make sure that this really is the only scenario
-                energies[0] = energies[0] + 0.0001 * 1e-9
-                energies[2] = energies[2] - 0.0001 * 1e-9
+                energies[0] = energies[0] + 0.01 * 1e-9
+                energies[2] = energies[2] - 0.01 * 1e-9
                 
 
         #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
         else:
             #print('the else loop was undergone - not yet in the correct energy range')
             energies[0] = energies[2]
-            energies[2] = energies[2] + 0.01 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
+            energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
             #print('these are the energies after the else loop', energies)
             continue
 
@@ -152,7 +159,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list wit
 
     
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
-#print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
+#energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0, 1, 70 * 268082.760427755 )
 
 def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):             
                                                                   
@@ -201,6 +208,7 @@ def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
     integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
     print('this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
+    print('this is the check for normalised_u', normalised_u[-1])
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
     #print('this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
@@ -234,7 +242,8 @@ def plot(quantum_number_couple_list):
     normalised_u_squared_array = []
     r_array = []
     for quantum_numbers in quantum_number_couple_list:
-        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,0.93827 , -1.62* 1e-9, 1/137, 0, quantum_numbers[0],40215264.187867135 )
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,0.93827 , -13.92* 1e-9, 1/137, 0, quantum_numbers[0],2386233.4776605917*2)
+        #10* 268248.2993221084
         normalised_u_array.append(normalised_u)
         normalised_u_squared_array.append(normalised_u_squared)
         r_array.append(r)
@@ -259,8 +268,8 @@ def plot(quantum_number_couple_list):
 
     return(normalised_u_array, r_array)
   
-plot([[4,0]])
-print(hydrogen_energies(4))
+plot([[1,0]])
+#print(hydrogen_energies(4))
 
 
         

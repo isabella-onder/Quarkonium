@@ -102,8 +102,8 @@ def comparator_with_residuals():
     axs_new[2].set_ylabel('Fractional difference \n $ (u_{num} - u_{theo})/u_{theo}$')
     ax_res.set_ylabel('Fractional difference zoom \n $ (u_{num} - u_{theo})/u_{theo}$')
     axs_new[2].set_xlabel('Separation r in $a_0$')
-    fig1.savefig('figs/comparator.svg', bbox_inches = 'tight')
-    fig2.savefig('figs/residual_zoom.svg', bbox_inches = 'tight')
+    fig1.savefig('figs/comparator.png', bbox_inches = 'tight')
+    fig2.savefig('figs/residual_zoom.png', bbox_inches = 'tight')
 
 comparator_with_residuals()
         

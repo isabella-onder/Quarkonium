@@ -35,9 +35,10 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     #print(a0, 'this is a0')
     r0 = 1e-6 * a0     # small start
-    rmax = 70* a0     # extend beyond peak
+    rmax = 8* a0     # extend beyond peak
+
     #rmax = 7678791.00312025
-    #print(rmax)
+    print('##################################################',rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -94,13 +95,14 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     r0 = 1e-6 * a0     # small start
     rmax = 33* a0     # extend beyond peak
     #rmax = 7678791.00312025
-    print(rmax)
+
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
     fig, ax = plt.subplots()
     labels = ['+0.1eV', '$E_{3,0}$ analytic', '-0.1eV'] #too high, perfect, too low
-    colours = ['#B1D0ED', 'grey', '#156082']
+    colours = [ "#95C4F0", 'black', "#206C90"]
+    #colours = ['grey', '#B1D0ED', , '#156082']
     #colours = ['darkseagreen', 'grey', 'peru']
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     for e,colour,label in zip(E_list, colours,labels):
@@ -144,8 +146,8 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     plt.yticks(size = 18)
     plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
     plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
-    #plt.savefig("figs/divergence_plot.svg", bbox_inches = 'tight')
-    #plt.show()
+    plt.savefig("figs/divergence_plot_2.svg", bbox_inches = 'tight')
+    plt.show()
     print(nodes_nb, turning_points_nb)
 
     return(nodes_nb, turning_points_nb, u, r)

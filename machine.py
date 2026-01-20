@@ -1,17 +1,18 @@
 from quarkonium import energy_range_finder
+from quarkonium import output
 from quarkonium import plotter_and_normaliser
 import constants as c
 
 
 rmax = 30 #because it has been sufficient for now
 
-#explicitely write and try energy range dictionary - arbitrary ranges
+#explicitely write and try energy range dictionary - arbitrary ranges (such that they converge)
 #(could make it like my hydrogen though that would assume known peaks)
 energy_ranges_c = {
     (1,0): [0,0,0.5], 
     (1,1): [0,0,1],
     (1,2): [0.8, 0, 1.5],
-    (2,0): [0.5, 0, 1]
+    (2,0): [0.5, 0, 1.3]
 }
 
 energy_ranges_b = {
@@ -44,15 +45,17 @@ def get_energy_range(n, l, type):
 
 def charmonium(n,l):
     quark = 'CHARM'
-    E_n, _ , u, r =  energy_range_finder(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
-    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l} is E_nl = ', E_n, '\n############################################################################## \n' )
+    E_n, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
+
+    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l} is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
 
 def bottonium(n,l):
     quark = 'BOTTOM'
-    E_n, _ , u , r = energy_range_finder(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta, rmax )
-    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n, '\n############################################################################## \n' )
+
+    E_n, _ , u , v, r = output(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta, rmax )
+    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
 
 
     
-#charmonium(1,0)
-bottonium(2,0)
+charmonium(1,0)
+#bottonium(2,0)
