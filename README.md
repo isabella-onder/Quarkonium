@@ -23,11 +23,18 @@ You can then use this to give predictions for the energy and produce plots of th
 Completed.
 
 Further tasks it can do:
-- So far, quite the same as Hydrogen
+- Calculate binding energies for given l and energy range (which is automatically input), numerically find radial wavefunction until divergence
+- For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip)
 Next up: making the plots aesthetically pleasing and scientifically interesting, investigating decay rates. 
+
+
 
 
 
 
 ### User's guide ###
 Upload all files. Call "charmonium(n,l)" from the machine.py file with desired n and l quantum numbers to get E_nl. 
+To obtain radial wavefunction plot, just unhash plt.show() at the bottom of quarkonium.py. Note to self: make it a Boolean toggle. 
+To obtain info on transition: run extension.py.
+
+Used constants are in the constants.py file: have been chosent according to most recent experimental research (will cite sources soon).
