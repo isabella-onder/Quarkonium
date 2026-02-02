@@ -7,6 +7,9 @@ import cmath
 import machine 
 import constants as c
 
+plot_wanted = False 
+quark = 'CHARM'
+
 #all the data below will initially be extracted in origin_c out of output from quarkonium.py and then reused independently from there
 
 #for the shiggles: spherical harmonics calculator, to be able to produce full wavefunction
@@ -32,6 +35,9 @@ def origin_c(n):
 
 #origin_c(1)
 
+
+
+
 #looking at the hyperfine splitting between spin up and down states, l = 0 necessarily
 #use formula from booklet, approximating R(0) = u(0)/r = v(0)
 def hyperfine_splitting(n):
@@ -43,6 +49,31 @@ def hyperfine_splitting(n):
     return delta_e
 
 #hyperfine_splitting(1)
+
+#inputting the formulae to calculate simple transitions: nothing more to compute
+def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split
+    E_n, _ , _, _, _ =  output(l,c.m_c,c.m_c,machine.get_energy_range(n, 0, quark), c.alpha_c, c.beta, c.rmax) #no care about rmax since just extracting the energy anyways
+    if hyperfine:
+        extracted_mass = E_n + hyperfine_splitting(1) + 2 * c.m_c
+    else:
+        extracted_mass = E_n + 2*c.m_c
+    print('this is the calculated from scratch j_psi mass', extracted_mass, 'expect 3.1667GeV ')
+    return extracted_mass
+
+#assuming for J/psi specifically, so n = 1, l = 0
+def lepton_decay():
+    M = extracting_mass(1,0,True)
+    origin_values, _, _, _ = origin_c(1)
+    
+    u_0, v_0 = origin_values #we approx v_0 as R(0)
+
+    #just for not inputting the value as found by the function lower done
+    v_0 = 1.24300568310729
+    lepton_width = 4 * (1/137)**2 * c.e_c**2/M**2 * v_0**2 *(1 - 16/3 * c.alpha_c/np.pi) #using the full version from one of the papers (though still not entire)
+    print('this is the lepton width', lepton_width)
+
+lepton_decay()
+
 
 #transitioning magnetically width: use formula given in paper
 #this works only for when the transitioning n are equal: otherwise, cannot extract photon momentum
@@ -108,30 +139,31 @@ def alternative_mag_transition(n):
     #hyperfine results: use l = 0 and other constants as usual. do it twice to get the final_node and then normalise
     _, _, _, _, _, hyper_final_node = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, c.rmax)
     hyper_nodes_nb, hyper_turning_points_nb, hyper_u, hyper_v, hyper_r, hyper_final_node = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, hyper_final_node)
-    integral_to_normalise = sp.integrate.simpson(hyper_u**2,hyper_r)                   
-    hyper_normalised_u = hyper_u/(np.sqrt(integral_to_normalise))
+    hyper_integral_to_normalise = sp.integrate.simpson(hyper_u**2,hyper_r)                   
+    hyper_normalised_u = hyper_u/(np.sqrt(hyper_integral_to_normalise))
     
     #usual result, except that we make it terminate at hyper final node such that we are summing over the same things
     #hence have to do it manually, for there not to be an issue with finding the energy
     #_, _, u, v, r = output(0, c.m_c, c.m_c, machine.get_energy_range(n, 0, type_c), c.alpha_c, c.beta, hyper_final_node)
 
     _, _, casual_u, casual_v, casual_r, casual_final_node = sch_solver(0, c.m_c, c.m_c, energy , c.alpha_c, c.beta, hyper_final_node)
-    integral_to_normalise = sp.integrate.simpson(casual_u**2,casual_r)                   
-    casual_normalised_u = casual_u/(np.sqrt(integral_to_normalise))
+    casual_integral_to_normalise = sp.integrate.simpson(casual_u**2,casual_r)                   
+    casual_normalised_u = casual_u/(np.sqrt(casual_integral_to_normalise))
+    print('these are the first values v and hyperv', casual_v[0]/casual_integral_to_normalise, hyper_v[0]/hyper_integral_to_normalise)
 
-    fig, axs = plt.subplots(ncols = 2, nrows = 1)
-    axs[0].scatter(casual_r, casual_u, marker = '.')
-    axs[1].scatter(hyper_r, hyper_u, marker = '.')
-    plt.show()
+    if plot_wanted:
+        fig, axs = plt.subplots(ncols = 2, nrows = 1)
+        axs[0].scatter(casual_r, casual_u, marker = '.')
+        axs[1].scatter(hyper_r, hyper_u, marker = '.')
+        plt.show()
 
     integral = hyper_integral(casual_normalised_u, hyper_normalised_u, casual_r, hyper_r)
-    #integral = hyper_integral(hyper_normalised_u, hyper_normalised_u, hyper_r) #this was a check, to ensure that the obtained values are normalised
-    #integral = hyper_integral(u, u, r) #this was a check, to ensure that the obtained values are normalised
-
+    
+    #using the given formula for magnetic transition, using the previously found splitting energy (fine or hyperfine?)
     gamma_width = 4 * alpha_em * e_Q**2 /(3*(c.m_c)**2) * (1+kappa_Q)**2 *k_gamma**3 * integral
     print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
     return gamma_width
-alternative_mag_transition(1)
+#alternative_mag_transition(1)
 
 
 
