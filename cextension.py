@@ -21,6 +21,20 @@ def spherical_harmonics(theta, phi, l, m):
 #though we will only be studying l = 0 states
 y_00 = np.sqrt(1/(4*np.pi))
 
+#the widths as given by pdg: quoting without the errors, in GeV
+#for j/psi specifically
+
+total_width = 92.6 * 10**(-6)
+three_gluons_percent = 0.641
+one_g_two_g_percent = 0.088
+lepton_positron_percent = 0.05971
+muon_positron_percent = 0.05961
+#those with 4 leptons are of the order of e-5 percent
+hyperfine_percent = 0.0141
+three_photons_percent = 1.16*10**(-5)  #very unlikely already as is, many other improbable things are more likely
+
+
+
 #finding the wavefunction at the origin for CHARMONIUM. 
 # Assume that necessarily l = 0 
 def origin_c(n):
@@ -117,9 +131,12 @@ def three_photons():
     M = extracting_mass(1,0,True)
     origin_values, _, _, _ = origin_c(1)
     u_0, v_0 = origin_values #we approx v_0 as R(0)
-
-    three_photon_width = 8*(np.pi**2-9)/9 * c.e_c**2*(1/137)**3/c.m_c**2 * v_0**2
+    
+    #v_0 = 1.24300568310729
+    
+    three_photon_width = 8*(np.pi**2-9)/(9) * c.e_c**2*(1/137)**3/M**2 * v_0**2 #I clearly just added a /pi 
     print('this is the three photon width', three_photon_width)
+    print('this is the real experimental value', total_width * three_photons_percent)
 
 #three_photons()
 
@@ -190,8 +207,8 @@ def alternative_mag_transition(n):
 
   
     #hyperfine results: use l = 0 and other constants as usual. do it twice to get the final_node and then normalise
-    _, _, _, _, _, hyper_final_node = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, c.rmax)
-    hyper_nodes_nb, hyper_turning_points_nb, hyper_u, hyper_v, hyper_r, hyper_final_node = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, hyper_final_node)
+    _, _, _, _, _, hyper_final_node_1 = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, c.rmax)
+    hyper_nodes_nb, hyper_turning_points_nb, hyper_u, hyper_v, hyper_r, hyper_final_node = sch_solver(0, c.m_c, c.m_c, energy + k_gamma, c.alpha_c, c.beta, hyper_final_node_1)
     hyper_integral_to_normalise = sp.integrate.simpson(hyper_u**2,hyper_r)                   
     hyper_normalised_u = hyper_u/(np.sqrt(hyper_integral_to_normalise))
     
@@ -199,7 +216,7 @@ def alternative_mag_transition(n):
     #hence have to do it manually, for there not to be an issue with finding the energy
     #_, _, u, v, r = output(0, c.m_c, c.m_c, machine.get_energy_range(n, 0, type_c), c.alpha_c, c.beta, hyper_final_node)
 
-    _, _, casual_u, casual_v, casual_r, casual_final_node = sch_solver(0, c.m_c, c.m_c, energy , c.alpha_c, c.beta, hyper_final_node)
+    _, _, casual_u, casual_v, casual_r, casual_final_node = sch_solver(0, c.m_c, c.m_c, energy , c.alpha_c, c.beta, hyper_final_node_1)
     casual_integral_to_normalise = sp.integrate.simpson(casual_u**2,casual_r)                   
     casual_normalised_u = casual_u/(np.sqrt(casual_integral_to_normalise))
     print('these are the first values v and hyperv', casual_v[0]/casual_integral_to_normalise, hyper_v[0]/hyper_integral_to_normalise)
@@ -217,6 +234,16 @@ def alternative_mag_transition(n):
     print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
     return gamma_width
 #alternative_mag_transition(1)
+
+
+#using the ratio formulae in a paper to see whether they are better approx
+def ratios():
+    three_g_ratio = (5*c.alpha_c**3)/(54*(1/137)**3*c.e_c**6) * (three_photons_percent*total_width)
+    one_gamma_two_g_ratio = (2*c.alpha_c**2)/(3*(1/137)**2*c.e_c**4) * (three_photons_percent*total_width)
+
+    print('these are the experimental three gluons & one photon and two gluons widths', total_width * three_gluons_percent, total_width * one_g_two_g_percent)
+    print('these are the values found via ratio', three_g_ratio, one_gamma_two_g_ratio)
+#ratios()
 
 
 

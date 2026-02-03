@@ -57,5 +57,5 @@ def bottonium(n,l):
 
 
     
-charmonium(1,0)
-#bottonium(2,0)
+#charmonium(1,0)
+#bottonium(1,0)
