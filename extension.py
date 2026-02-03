@@ -60,7 +60,7 @@ def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hy
     print('this is the calculated from scratch j_psi mass', extracted_mass, 'expect 3.1667GeV ')
     return extracted_mass
 
-#assuming for J/psi specifically, so n = 1, l = 0
+#THE FOLLOWING ARE ALL assuming for J/psi specifically, so n = 1, l = 0
 def lepton_decay():
     M = extracting_mass(1,0,True)
     origin_values, _, _, _ = origin_c(1)
@@ -72,7 +72,60 @@ def lepton_decay():
     lepton_width = 4 * (1/137)**2 * c.e_c**2/M**2 * v_0**2 *(1 - 16/3 * c.alpha_c/np.pi) #using the full version from one of the papers (though still not entire)
     print('this is the lepton width', lepton_width)
 
-lepton_decay()
+#lepton_decay()
+
+
+def three_gluons():
+    M = extracting_mass(1,0,True)
+    origin_values, _, _, _ = origin_c(1)
+    u_0, v_0 = origin_values #we approx v_0 as R(0)
+
+    #just for not inputting the value as found by the function lower done
+    #v_0 = 1.24300568310729
+    
+    #the simplification one
+    three_gluon_width = 40*(np.pi**2 - 9)/(81*np.pi) * c.alpha_c**3/M**2 * v_0**2*(1-3.7*c.alpha_c/np.pi) 
+    #* (1 - 3.7 * c.alpha_c/np.pi)
+    print('this is the three gluon width', three_gluon_width)
+
+    #the full one from the paper with its values, putting all in GeV
+    #includes relativistic and radiative corrections, which above does not
+    N = 0.57 * 10**(3/2) #from the paper
+    beta = 0.310 #from the paper
+    kappa = 3*(112+25*np.pi**2)/(16*(np.pi**2-9)) #as defined in the paper
+    print('should find that this is approx 0.77', kappa*beta**2/M**2)
+    C = 3.7 #from the paper
+
+    three_gluon_width = (80*(np.pi**2-9)*c.alpha_c**3 * N**2 * beta**3)/(81*np.pi**(9/2)*M)*(1-kappa*beta**2/M**2)*(1-C*c.alpha_c/np.pi)
+    print('this is the exact gluon width', three_gluon_width)
+
+
+#three_gluons()
+
+def one_g_two_g(): #i.e. one photon (gamma) and two gluons
+    M = extracting_mass(1,0,True)
+    origin_values, _, _, _ = origin_c(1)
+    u_0, v_0 = origin_values #we approx v_0 as R(0)
+
+    #one_two_width = 32*(np.pi**2-9)/9 *c.e_c**2*(1/137)*c.alpha_c**2/c.m_c**2*v_0**2
+    one_two_width = (32*(np.pi**2-9)*c.alpha_c**2*(1/137))/(9*np.pi*M**2) * v_0**2 * (1-6.7*c.alpha_c/np.pi)
+    print('this is the width for one photon and two gluons', one_two_width)
+
+#one_g_two_g()
+
+def three_photons():
+    M = extracting_mass(1,0,True)
+    origin_values, _, _, _ = origin_c(1)
+    u_0, v_0 = origin_values #we approx v_0 as R(0)
+
+    three_photon_width = 8*(np.pi**2-9)/9 * c.e_c**2*(1/137)**3/c.m_c**2 * v_0**2
+    print('this is the three photon width', three_photon_width)
+
+#three_photons()
+
+
+
+#this is not working very well: let's look at ratio formulae instead (need to fact check those formulae)
 
 
 #transitioning magnetically width: use formula given in paper
