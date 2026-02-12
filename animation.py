@@ -1,19 +1,12 @@
-from quarkonium import output
-from quarkonium import sch_solver
-import cextension as ce
-import bextension as be
-import scipy as sp
-import numpy as np
-import matplotlib.pyplot as plt
-import cmath
-import machine 
-import constants as c
+
 import random
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.animation as animation
 
-#here I want to make the code to be able to make a spectrum: that is, given a starting population and the various modes of decay
-#for now: copy pasting the homework from last time
 
-#motivate it as seeing how much of what and how much j/psi in the context of suppression QGP (can do one with real values and one with mine)
+
+#here I want the code to just make the animation: keep it as a separate function of its own, as I may want to tweak things specifically
 
 def has_transitioned(prob):
     r = random.random()
@@ -48,15 +41,16 @@ def evolveMany(states, rules):
         newState.append(evolveOne(states[k], rules))
     return newState
 
-def evolve_system(NA, NB, NC, ND, NE, rules, n_steps):
+def evolve_system(NA, NB, NC, ND, NE, NF, rules, n_steps):
     
-    state = (['A'] * NA)+(['B'] * NB)+(['C'] * NC)+(['D'] * ND)+(['E'] * NE)
+    state = (['A'] * NA)+(['B'] * NB)+(['C'] * NC)+(['D'] * ND)+(['E'] * NE)+(['F'] * NF)
     
     A_count = []
     B_count = []
     C_count = []
     D_count = []
     E_count = []
+    F_count = []
     
     for i in range (n_steps +1):
         a = 0
@@ -64,6 +58,7 @@ def evolve_system(NA, NB, NC, ND, NE, rules, n_steps):
         c = 0
         d = 0
         e = 0
+        f = 0
         for k in range(len(state)):
             if state[k] == 'A':
                 a = a + 1
@@ -75,6 +70,8 @@ def evolve_system(NA, NB, NC, ND, NE, rules, n_steps):
                 d = d +1
             elif state[k] == 'E':
                 e = e +1
+            elif state[k] == 'F':
+                f = f +1
             else:
                 print('that seems not to be a valid input')
         A_count.append(a)
@@ -82,10 +79,11 @@ def evolve_system(NA, NB, NC, ND, NE, rules, n_steps):
         C_count.append(c)
         D_count.append(d)
         E_count.append(e)
+        F_count.append(f)
         state = evolveMany(state,rules)
 
     # YOUR CODE HERE
-    return np.array(A_count), np.array(B_count), np.array(C_count), np.array(D_count), np.array(E_count)
+    return np.array(A_count), np.array(B_count), np.array(C_count), np.array(D_count), np.array(E_count), np.array(F_count)
 
 ##############################################################################################################
 n_steps = 200
@@ -134,6 +132,7 @@ rules_1 = [
     ('A','C',p_C),
     ('A','D',p_D),
     ('A','E',p_E),
+    ('A','F',p_F),
     #('C','A', p_C)   
 ]
 
@@ -146,21 +145,64 @@ def run() :
     NC = 0
     ND = 0
     NE = 0
-    y_A, y_B, y_C, y_D, y_E = evolve_system(NA, NB, NC, ND, NE, rules_1, 2* n_steps)
+    NF = 0
+    y_A, y_B, y_C, y_D, y_E,y_F = evolve_system(NA, NB, NC, ND, NE, NF, rules_1, 2* n_steps)
 
     
-    return y_A,y_B,y_C,y_D,y_E
+    return y_A,y_B,y_C,y_D,y_E,y_F
 
-y_a_tot,y_b_tot,y_c_tot, y_d_tot, y_e_tot = run()
-plt.figure(figsize=(8, 4))
-#plt.ylim(0,270)
-plt.xlabel('time (h)')
+y_a_tot,y_b_tot,y_c_tot, y_d_tot, y_e_tot, y_f_tot = run()
+
+
+fig, ax = plt.subplots()
+
+plt.xlabel('time (s)')
 plt.ylabel('Number of particles in given state')
-plt.plot(xs+xs1, y_a_tot,label = 'A' )
-plt.plot(xs+xs1, y_b_tot,label = 'B' )
-plt.plot(xs+xs1, y_c_tot,label = 'C' )
-plt.plot(xs+xs1, y_d_tot,label = 'D' )
-plt.plot(xs+xs1, y_e_tot,label = 'E' )
-plt.legend(loc = 'center right')
+
+
+x_axis = xs+xs1
+plot_A = ax.plot(x_axis, y_a_tot,label = 'A', linewidth = 3)[0]
+plot_B = ax.plot(xs+xs1, y_b_tot,label = 'B', linewidth = 3 )[0]
+plot_C = ax.plot(xs+xs1, y_c_tot,label = 'C', linewidth = 3 )[0]
+plot_D = ax.plot(xs+xs1, y_d_tot,label = 'D', linewidth = 3 )[0]
+plot_E = ax.plot(xs+xs1, y_e_tot,label = 'E' , linewidth = 3)[0]
+plot_F = ax.plot(xs+xs1, y_f_tot,label = 'F', linewidth = 3 )[0]
+#ax.legend(loc = ' right')
+ax.legend()
 plt.title('Evolution of particle count according to state')
+
+
+def update(frame):
+    # for each frame, update the data stored on each artist.
+    x = x_axis[:frame]
+    y = y_a_tot[:frame]
+
+    # update the line plot:
+    plot_A.set_xdata(x_axis[:frame])
+    plot_A.set_ydata(y_a_tot[:frame])
+
+    plot_B.set_xdata(x_axis[:frame])
+    plot_B.set_ydata(y_b_tot[:frame])
+
+    plot_C.set_xdata(x_axis[:frame])
+    plot_C.set_ydata(y_c_tot[:frame])
+
+    plot_D.set_xdata(x_axis[:frame])
+    plot_D.set_ydata(y_d_tot[:frame])
+
+    plot_E.set_xdata(x_axis[:frame])
+    plot_E.set_ydata(y_e_tot[:frame])
+
+    plot_F.set_xdata(x_axis[:frame])
+    plot_F.set_ydata(y_f_tot[:frame])
+
+
+    return (plot_A, plot_B, plot_C, plot_D, plot_E, plot_F)
+
+
+ani = animation.FuncAnimation(fig=fig, func=update, frames=400, interval=30, repeat = False)
+
+#if I want to save, just need to unhash
+#animation. Animation.save(ani, 'j_psi_decay_animation.gif')
 plt.show()
+

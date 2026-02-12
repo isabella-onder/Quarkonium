@@ -10,6 +10,7 @@ m_b = 4.183
 rmax = 30 #because it has been sufficient for now
 
 e_c = 2/3 #charm charge
+e_b = -1/3 #bottom charge
 
 
 #unit converters:

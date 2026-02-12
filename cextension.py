@@ -66,7 +66,7 @@ def hyperfine_splitting(n):
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split
-    E_n, _ , _, _, _ =  output(l,c.m_c,c.m_c,machine.get_energy_range(n, 0, quark), c.alpha_c, c.beta, c.rmax) #no care about rmax since just extracting the energy anyways
+    E_n, _ , _, _, _ =  output(l,c.m_c,c.m_c,machine.get_energy_range(1, 0, quark), c.alpha_c, c.beta, c.rmax) #no care about rmax since just extracting the energy anyways
     if hyperfine:
         extracted_mass = E_n + hyperfine_splitting(1) + 2 * c.m_c
     else:
@@ -74,69 +74,94 @@ def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hy
     print('this is the calculated from scratch j_psi mass', extracted_mass, 'expect 3.1667GeV ')
     return extracted_mass
 
-#THE FOLLOWING ARE ALL assuming for J/psi specifically, so n = 1, l = 0
-def lepton_decay():
+#at the start of each one I would do the same values called hence a function:
+def header():
     M = extracting_mass(1,0,True)
     origin_values, _, _, _ = origin_c(1)
+    energy = machine.charmonium(1,0)
     
     u_0, v_0 = origin_values #we approx v_0 as R(0)
 
-    #just for not inputting the value as found by the function lower done
-    v_0 = 1.24300568310729
-    lepton_width = 4 * (1/137)**2 * c.e_c**2/M**2 * v_0**2 *(1 - 16/3 * c.alpha_c/np.pi) #using the full version from one of the papers (though still not entire)
-    print('this is the lepton width', lepton_width)
+    #getting the correct v0
+    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1) , c.alpha_c, c.beta, c.rmax)
+    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1), c.alpha_c, c.beta, lep_final_node_1)
+    lep_integral_to_normalise = sp.integrate.simpson(lep_u**2,lep_r)                   
+    lep_normalised_u = lep_u/(np.sqrt(lep_integral_to_normalise))
+    print('these are the first values lep_v and hyperv', lep_v[0]/lep_integral_to_normalise)
+    print('whereas this is the original v_0', v_0)
+    lep_normalised_v = lep_v/lep_integral_to_normalise
 
-#lepton_decay()
+    print(M, energy, v_0, lep_normalised_v[0])
+    return M, energy, v_0, lep_normalised_v[0]
+
+#header()
+
+#because we are only doing the same, J/psi every time: no need to compute every time. 
+# If necessary, change header and then change these values
+M = 3.166710592379291 #GeV total mass of the state
+energy = 0.43707275390625 #Gev binding energy of ground state as found by solver
+v_0 = 0.9148623504190927 #value at origin for eta_c
+lep_normalised_v = 1.473747542258824 #value at origin for J/psi
 
 
-def three_gluons():
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_c(1)
-    u_0, v_0 = origin_values #we approx v_0 as R(0)
+#THE FOLLOWING ARE ALL assuming for J/psi specifically, so n = 1, l = 0
+def lepton_decay(alpha):
+    #M, energy, v_0, lep_normalised_v = header()
+    lepton_width_o = 4 * (1/137)**2 * c.e_c**2/M**2 * v_0**2 *(1 - 16/3 * alpha/np.pi) #using the full version from one of the papers (though still not entire)
+    lepton_width = 4 * (1/137)**2 * c.e_c**2/M**2 * lep_normalised_v**2 *(1 - 16/3 * alpha/np.pi) #using the full version from one of the papers (though still not entire)
+    print('this is the lepton width', lepton_width, 'whereas the real one is', lepton_positron_percent*total_width)
+    return lepton_width
+#lepton_decay(c.alpha_c)
 
-    #just for not inputting the value as found by the function lower done
-    #v_0 = 1.24300568310729
+
+def three_gluons(alpha):
+    
     
     #the simplification one
-    three_gluon_width = 40*(np.pi**2 - 9)/(81*np.pi) * c.alpha_c**3/M**2 * v_0**2*(1-3.7*c.alpha_c/np.pi) 
+    three_gluon_width_simple_o = 40*(np.pi**2 - 9)/(81*np.pi) * alpha**3/M**2 * lep_normalised_v**2*(1-3.7*alpha/np.pi) 
+    three_gluon_width_simple = 40*(np.pi**2 - 9)/(81*np.pi) * alpha**3/M**2 * lep_normalised_v**2*(1-3.7*alpha/np.pi) 
     #* (1 - 3.7 * c.alpha_c/np.pi)
-    print('this is the three gluon width', three_gluon_width)
+    print('this is the three gluon width', three_gluon_width_simple)
 
     #the full one from the paper with its values, putting all in GeV
     #includes relativistic and radiative corrections, which above does not
     N = 0.57 * 10**(3/2) #from the paper
     beta = 0.310 #from the paper
     kappa = 3*(112+25*np.pi**2)/(16*(np.pi**2-9)) #as defined in the paper
-    print('should find that this is approx 0.77', kappa*beta**2/M**2)
+    #print('should find that this is approx 0.77', kappa*beta**2/M**2)
     C = 3.7 #from the paper
 
-    three_gluon_width = (80*(np.pi**2-9)*c.alpha_c**3 * N**2 * beta**3)/(81*np.pi**(9/2)*M)*(1-kappa*beta**2/M**2)*(1-C*c.alpha_c/np.pi)
-    print('this is the exact gluon width', three_gluon_width)
+    three_gluon_width = (80*(np.pi**2-9)*alpha**3 * N**2 * beta**3)/(81*np.pi**(9/2)*M)*(1-kappa*beta**2/M**2)*(1-C*alpha/np.pi)
+    print('this is the paper gluon width', three_gluon_width)
+    print('this is the experimental gluon width', three_gluons_percent * total_width)
+
+    return three_gluon_width
+
+#three_gluons(c.alpha_c)
+
+def one_g_two_g(alpha): #i.e. one photon (gamma) and two gluons
 
 
-#three_gluons()
-
-def one_g_two_g(): #i.e. one photon (gamma) and two gluons
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_c(1)
-    u_0, v_0 = origin_values #we approx v_0 as R(0)
-
-    #one_two_width = 32*(np.pi**2-9)/9 *c.e_c**2*(1/137)*c.alpha_c**2/c.m_c**2*v_0**2
-    one_two_width = (32*(np.pi**2-9)*c.alpha_c**2*(1/137))/(9*np.pi*M**2) * v_0**2 * (1-6.7*c.alpha_c/np.pi)
+    one_two_width_o = 32*(np.pi**2-9)/9 *c.e_c**2*(1/137)*c.alpha_c**2/c.m_c**2*v_0**2
+    one_two_width = (32*(np.pi**2-9)*alpha**2*(1/137))/(9*np.pi*M**2) * lep_normalised_v**2 * (1-6.7*alpha/np.pi)
     print('this is the width for one photon and two gluons', one_two_width)
+    print('this is the original width for one photon and two gluons', one_two_width_o)
 
-#one_g_two_g()
+    print('this is the experimental width for one photon two gluons', one_g_two_g_percent * total_width)
+    return one_two_width
+
+#one_g_two_g(c.alpha_c)
 
 def three_photons():
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_c(1)
-    u_0, v_0 = origin_values #we approx v_0 as R(0)
+
     
-    #v_0 = 1.24300568310729
-    
-    three_photon_width = 8*(np.pi**2-9)/(9) * c.e_c**2*(1/137)**3/M**2 * v_0**2 #I clearly just added a /pi 
-    print('this is the three photon width', three_photon_width)
+
+    three_photon_width_o = 8*(np.pi**2-9)/(9) * c.e_c**2*(1/137)**3/M**2 * v_0**2 #I clearly just added a /pi 
+    three_photon_width_c = 8*(np.pi**2-9)/(9) * c.e_c**2*(1/137)**3/M**2 * lep_normalised_v**2 #I clearly just added a /pi 
+    print('this is the three photon width original', three_photon_width_o)
+    print('this is the three photon width correct', three_photon_width_c)
     print('this is the real experimental value', total_width * three_photons_percent)
+    return three_photon_width_o
 
 #three_photons()
 
@@ -200,7 +225,7 @@ def alternative_mag_transition(n):
     kappa_Q = 4/3 * c.alpha_c/(2*np.pi)
 
     #need to input the energy here
-    energy = 0.43707275390625 #GeV, as pdt by charmonium(1,0) in machine.py
+    energy = machine.charmonium(1,0) #GeV, as pdt by charmonium(1,0) in machine.py
 
     k_gamma = (hyperfine_splitting(n)) #assuming it is indeed in N.U., otherwise need to divide by c
     k_gamma = 0.11
@@ -237,13 +262,20 @@ def alternative_mag_transition(n):
 
 
 #using the ratio formulae in a paper to see whether they are better approx
-def ratios():
-    three_g_ratio = (5*c.alpha_c**3)/(54*(1/137)**3*c.e_c**6) * (three_photons_percent*total_width)
-    one_gamma_two_g_ratio = (2*c.alpha_c**2)/(3*(1/137)**2*c.e_c**4) * (three_photons_percent*total_width)
+def ratios(alpha):
+    three_g_ratio = (5*alpha**3)/(54*(1/137)**3*c.e_c**6) * (three_photons_percent*total_width)
+    one_gamma_two_g_ratio = (2*alpha**2)/(3*(1/137)**2*c.e_c**4) * (three_photons_percent*total_width)
 
-    print('these are the experimental three gluons & one photon and two gluons widths', total_width * three_gluons_percent, total_width * one_g_two_g_percent)
+    three_g_ratio_e = (5*alpha**3)/(54*(1/137)**3*c.e_c**6) * three_photons()
+    one_gamma_two_g_ratio_e = (2*alpha**2)/(3*(1/137)**2*c.e_c**4) * three_photons()
+
+
+    print('these are the exact experimental three gluons & one photon and two gluons widths', total_width * three_gluons_percent, total_width * one_g_two_g_percent)
+    print('these are my values three gluons & one photon and two gluons widths', three_g_ratio_e, one_gamma_two_g_ratio_e)
     print('these are the values found via ratio', three_g_ratio, one_gamma_two_g_ratio)
-#ratios()
+    ratio_list = [three_g_ratio, one_gamma_two_g_ratio]
+    return ratio_list
+#ratios(c.alpha_c)
 
 
 

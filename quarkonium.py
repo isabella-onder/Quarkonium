@@ -182,8 +182,8 @@ def output(l,m_1,m_2, E_range, alpha, beta, r):
     if E_nl == 'INVALID E_N':
         return 'nope'
     
-    print('This is rmax', rmax)
-    print('This is the estimated E_nl', E_nl)
+    #print('This is rmax', rmax)
+    #print('This is the estimated E_nl', E_nl)
     
     #plotting it one final time with the estimated E_nl and with rmax
 
@@ -195,18 +195,18 @@ def output(l,m_1,m_2, E_range, alpha, beta, r):
     #evaluating integral over all u_nl to then normalise by result
     #print('This is the max u', u[1000])
     integral = sp.integrate.simpson(u**2,r)                           
-    print('U this is integral result', integral)
+    #print('U this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
-    print('U this is the max normalised u', normalised_u[1000])
+    #print('U this is the max normalised u', normalised_u[1000])
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
-    print('U this is normalised check: hopefully one', normalised_check)
+    #print('U this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
 
 
     #try to normalise v
     normalised_v = v/(np.sqrt(integral))
-    print('U this is v before normalisation [0]', v[0])
-    print('U this is normalised_v [0]', normalised_v[0])
+    #print('U this is v before normalisation [0]', v[0])
+    #print('U this is normalised_v [0]', normalised_v[0])
 
     return E_nl, final_node, normalised_u, normalised_v, r
 

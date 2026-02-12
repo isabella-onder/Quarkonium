@@ -48,13 +48,14 @@ def charmonium(n,l):
     E_n, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
 
     print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l} is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
+    return E_n
 
 def bottonium(n,l):
     quark = 'BOTTOM'
 
     E_n, _ , u , v, r = output(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta, rmax )
     print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
-
+    return E_n
 
     
 #charmonium(1,0)
