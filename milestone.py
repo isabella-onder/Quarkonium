@@ -5,24 +5,30 @@ import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 #important to note: using h_bar = c = 1
 
 
 #unit converters:
 def kg_to_GeVc2(m):                 #input mass in kg
     return m * 5.610 * 10 **26
+print(kg_to_GeVc2(9.10938 * 10 ** (-31)))
 
 def m_to_GeV(r):                    #input length in m
     return r * 5.0677 * 10 ** 15
 
 
 
-def hydrogen_energies(n):               #for convenience: exact energy calculator for Hydrogen given n
+def hydrogen_energies(n):   
+                #for convenience: exact energy calculator for Hydrogen given n
     mu = 0.000511 #electron mass in GeV/c^-2
+    mu = (1/0.000511 + 1/0.93827)**(-1)
     alpha = 1/137 
-    E_n = - mu * alpha**2/(2*n**2)
-    print(E_n)
-hydrogen_energies(1)
+    E_n = - mu * alpha**2/(2*n**2) #E_n in GeV
+    return E_n
+#print('this is hydrogen energies ', hydrogen_energies(1), hydrogen_energies(2), hydrogen_energies(3), hydrogen_energies(4))
+
+
 
 def system(r, Y, l, mu, E_nl, alpha, beta): #defining my system of differential equations: taking all parameters as input
     u, v = Y                                #unpacking y since two equations (one second order split into two first order)
@@ -34,102 +40,240 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2, E_nl, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
+def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system parameters as arguments to make adaptable code for different particles
     mu = (1/m_1 + 1/m_2) ** (-1)
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
+    #print('this is a0', a0)
     r0 = 1e-6 * a0     # small start
-    rmax = 10 * a0     # extend beyond peak
 
-
-    r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,20100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-    sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
+    sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'DOP853') 
     u, v = sol.y[0], sol.y[1] 
     r = sol.t
 
+    #making it print v as a check for my quarkonium: why do I get different v depending on initial condition
+    #print('the first two and last v', v[0], v[1], v[-1])
+
+    #making it print the reason it terminated
+    #reason = sol.message
+    #print('this is the reason it terminated', reason)
+
     #automatically finds steps where evaluates to 0 (thanks to trigger aboce)
     nodes_location = sol.t_events[0]
+    #print('these are the nodes_location', nodes_location)
     nodes_nb = len(nodes_location)
+
+    #extract the final node: starts diverging from there --- NEED TO CHECK THIS QUITE BADLY
+    final_node = nodes_location[-1] 
+    
 
     #finds turning points by looking for slope change, by calculating for all pairs of points and looking for sign change when multiplied
     turning_points_index = [i for i in range(1, len(u)-1) if (u[i]-u[i-1])*(u[i+1]-u[i]) < 0] 
     turning_points_location = r[turning_points_index]
+    #print('these are the turning points location', turning_points_location)
     turning_points_nb = len(turning_points_location)
 
 
     #plt.scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
     #plt.show()
 
-    return(nodes_nb, turning_points_nb, u, r)
-
-#sch_solver(1,0.000511,100000000000,-1.5125*10**(-9)  ,1/137,0)
-#sch_solver(1,0.000511,100000000000,-1.511*10**(-9)  ,1/137,0)
-#sch_solver(1,0.000511,100000000000,-1.515*10**(-9)  ,1/137,0)
+    return nodes_nb, turning_points_nb, u, r, final_node
 
 
+#sensitivity-wise: we have an initial difference of 0.01 eV in our energy range list, we want the absolute difference to be less thatn 0.0001 and we add 0.01 if they are not 
+#in the correct range, 0.0001 if they are
+
+#can just make input for the sensitivity
 
 
-def energy_finder(l, m_1, m_2, energies, alpha, beta):   #input list with energy range boundaries within which to search
-    
-    while abs(energies[0]-energies[2]) > 1e-9 * 0.001:
-
+def energy_finder(l, m_1, m_2, energies, alpha, beta,n, rmax):   #input list with energy range boundaries within which to search
+    energies[2] = energies[2] + (0.01 * 1e-9)
+    print('hopefully, it has either begun or undergone a break')
+    while abs(energies[0]-energies[2]) > 1e-9 * 0.0001:  #make sure that this threshold is smaller than the difference between enegies[0] and energies [2]
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
-        print(energies, E_2)
+        #print('these are the energies at the start of the while loop', energies)
     
 
         turning_points_nb = []
         nodes_nb = []  
 
         for E_nl in energies:  #loop over 1,2,3 and store nb of nodes and turning points for each energy, in arrays where index 0 is E_1, 1 is E_2, 2 is E_3
-            n_nb, tp_nb, _, _= sch_solver(l, m_1, m_2, E_nl, alpha, beta)
+            n_nb, tp_nb, _, _, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
         print (nodes_nb, turning_points_nb)
 
+        '''
+        #this is ambiguous: it just could be that the given energies switch from too high for E_n to too low for E_n+1 and therefore get gaps
+        
+        #if all nodes/turning_points are the same, means they are both on the same side as the solution: add small step to the far side and restart iteration
+        if nodes_nb[0] == nodes_nb[1] == nodes_nb[2] and turning_points_nb[0] == turning_points_nb[1] == turning_points_nb[2]: 
+            energies[2] = energies[2] + (0.1 * 1e-9)
+            #print('the energies were hopefully updated', energies)
+            continue
+        '''
 
+        #unless nodes/turning points correspond to what is expected for an enclosing range, it should continue
+        
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
-        if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
-            print('E_1 and E_2 are different')
-            energies[2] = energies[1]
+        #on the condition that the energy_range indeed includes the energy we are looking for
+        if nodes_nb[0] == (n-l) and nodes_nb[2] == (n-l+1) and turning_points_nb[0] == (n-l+1) and turning_points_nb[2] == (n-l):
+            print('the if loop was initiated')
+            if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
+                
+                energies[2] = energies[1]
+                #print('E_1 and E_2 are different', energies)
 
-        elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
-            print('E_2 and E_3 are different')
-            energies[0] = energies[1]
-    print(energies)
-    return energies
+            elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
+                
+                energies[0] = energies[1]
+                #print('E_2 and E_3 are different', energies)
+
+            else:
+                #print('they are in the correct range but not yet close enough', energies) #make sure that this really is the only scenario
+                energies[0] = energies[0] + 0.01 * 1e-9
+                energies[2] = energies[2] - 0.01 * 1e-9
+                
+
+        #i.e. we are not yet in the correct energy range: need to bump upwards (since that is the way we are iterating for now)
+        else:
+            #print('the else loop was undergone - not yet in the correct energy range')
+            energies[0] = energies[2]
+            energies[2] = energies[2] + 0.1 * 1e-9 #the more certain we are about our range, the smaller we can make this (and if uncertain, make it larger for it to converge faster but beware if it misses it)
+            #print('these are the energies after the else loop', energies)
+            continue
+
+        
+    #print('this is final node', final_node)
+    return energies[1], final_node
+
+
+#energy_finder(0,0.000511,100000000, [-6e-10, 0, -5.9e-10], 1/137, 0, 1, 70 * 268082.760427755 )
+#energy_finder(0,0.000511,100000000, [-5.9e-09, 0, -5.8e-09], 1/137, 0, 2, 70 * 268082.760427755 )
+
     
 #print(sch_solver(0,0.000511,100000000000,1,1/137,0))
-#print(energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0))
+#energy_finder(0,0.000511,100000000000,[-13.590 * 1e-9,  -13.730 * 1e-9]  ,1/137,0, 1, 70 * 268082.760427755 )
 
+def energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax):             
+                                                                  
+    energy_range = [E_initial, 0, E_initial]
+    
+    E_n, final_node = energy_finder(l,m_1,m_2, energy_range, alpha, beta, n, rmax)
+    return E_n, final_node
 
+    
+    '''
+    returned_energies = []
+    final_nodes = []
+    for n in range(n_max, n_max+1):
+        E_n, final_node = energy_finder(l, m_1, m_2, energy_range, alpha, beta,n, rmax)
+        print(E_n, 'hopefully the final energy')
+        returned_energies.append(E_n)
+        final_nodes.append(final_node)
+        print('this is iteration n', n)
+        energy_range = [E_n + (0.1 * 1e-9), 0, E_n + (0.1 * 1e-9)]
+        print('and this is the next energy range to try', energy_range)
+    '''
+    #return returned_energies, final_nodes
 
-def plotter_and_normaliser(l, m_1, m_2, energies, alpha, beta):
+#this is just the starting point and final plotter: extracts the optimised E_nl with its final_node, and hence reruns through schrodinger equation with those parameters
+#then integrates and plots
+def plotter_and_normaliser(l, m_1, m_2, E_initial, alpha, beta, n, rmax):
+    mu = (1/m_1 + 1/m_2) ** (-1)
+    a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
+    print('this is a0', a0)
 
-    energies = energy_finder(l, m_1, m_2, energies, alpha, beta)
-    E_nl = energies[1]                                                #extracting final iteration of energy_finder and taking it as E_nl to evaluate at
+    #returned_energies, final_nodes = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
+    E_nl, final_node = energy_range_finder(l,m_1,m_2, n, E_initial, alpha, beta, rmax)
+
+    #E_nl = returned_energies[0] #for now just try with E_1 and hence final_node_1
+    #final_node = final_nodes[0]  
+    rmax = final_node
+    print('This is rmax', rmax)
+
     print('This is the estimated E_nl', E_nl)
-    _, _, u, r = sch_solver(l, m_1, m_2, E_nl, alpha, beta)
-
-    plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
-    plt.show()
+    nodes_nb, turning_points_nb, u, r, final_node = sch_solver(l, m_1, m_2, E_nl, alpha, beta,n, rmax)
+    print('this is nodes_nb and turning points nb of our plotted one', nodes_nb, turning_points_nb)
+    #plt.scatter(r, u, marker = '.')                                  #plot the output solutions as is
+    #plt.show()
+  
 
     integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
     print('this is integral result', integral)
     normalised_u = u/(np.sqrt(integral))
+    print('this is the check for normalised_u', normalised_u[-1])
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
-    print('this is normalised check: hopefully one', normalised_check)
+    #print('this is normalised check: hopefully one', normalised_check)
+    normalised_u_squared = normalised_u**2
+    fig, axs = plt.subplots(1, 2)
+    axs[0].scatter(r/a0, normalised_u, marker = '.', color = "grey")                        #plot u_nl(r) normalised
+    axs[0].set_ylabel("$u_{nl}(r)$ normalised")
+    axs[1].scatter(r/a0, normalised_u_squared, marker = '.', color = "plum")                 #plot |u_nl(r)|**2 normalised (probability density function)
+    axs[1].set_ylabel("$|u_{nl}(r)|^2$ normalised")
+    
+    fig.suptitle("Hydrogen state n = "  + str(n) + ", l =  " +  str(l))
+    fig.supxlabel("Distance in units $r/a_{0}$")
 
-    plt.scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    plt.show()
-    plt.scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
-    plt.show()
+    fig.tight_layout(pad=1.0)
+    #plt.show()
 
-#plotter_and_normaliser(1,0.000511,100000000000,[-1.516 * 1e-9, 0, -1.510 * 1e-9]  ,1/137,0)
-plotter_and_normaliser(0,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+    return normalised_u, normalised_u_squared, r
 
-#for cuttinf off: just do it with much larger r_max and then find when goes above max turning point and cut it off from there onwards
+#plotter_and_normaliser(1,0.000511,100000000000,[-13.7 * 1e-9, 0, -13.5 * 1e-9]  ,1/137,0)
+#plotter_and_normaliser(0,0.000511,100000000000,[-0.3 * 1e-9, 0, -0.2 * 1e-9]  ,1/137,0)
+
+
+#attempt to get it to loop
+#want to make it such that it finds all the energy levels on its own
+#hence will give random lower bound and once it calculates first energy, will go upwards from there
+
+#energy_range_finder(0,0.000511,100000000000, 2, -13.7*1e-9,1/137,0, 40215264.187867135)
+#plotter_and_normaliser(0,0.000511 ,100000000000 , -4* 1e-9, 1/137, 0, 3, 40215264.187867135)
+
+def plot(quantum_number_couple_list):
+    normalised_u_array = []
+    normalised_u_squared_array = []
+    r_array = []
+    for quantum_numbers in quantum_number_couple_list:
+        normalised_u, normalised_u_squared, r = plotter_and_normaliser(quantum_numbers[1],0.000510999 ,0.93827 , -13.92* 1e-9, 1/137, 0, quantum_numbers[0],2386233.4776605917*2)
+        #10* 268248.2993221084
+        normalised_u_array.append(normalised_u)
+        normalised_u_squared_array.append(normalised_u_squared)
+        r_array.append(r)
+    colours = ['grey', '#B1D0ED', '#156082']
+    energies = ['$|u_{1,0}|^2$', '$|u_{2,0}|^2$', '$|u_{2,1}|^2$']
+    
+    fig, ax = plt.subplots()
+    for u, u_2, r, colour, e in zip(normalised_u_array, normalised_u_squared_array, r_array, colours, energies):
+        plt.scatter(r/268082.760427755, u_2 * 10**6, marker = '.', color = colour, s = 9, label = e)
+    ax.set_xlim([0, 15])
+    plt.xlabel('Separation $r$ ($a_0$)', size = 18)
+    plt.ylabel('$|u_{nl}(r)|^2$ ($10^{-6}$)', size = 18)
+    plt.xticks(size = 15)
+    plt.yticks(size = 15)
+    plt.tick_params(which = 'major', bottom = True, left = True,  direction = 'in') 
+
+    #ax.ticklabel_format(style='plain')
+    ax.yaxis.set_major_locator(plt.MaxNLocator(4))
+    plt.legend(markerscale=15, fontsize=20)
+    #plt.savefig("figs/hydrogen_plots.svg", bbox_inches = 'tight')
+    #plt.show()
+
+    return(normalised_u_array, r_array)
+  
+plot([[1,0]])
+#print(hydrogen_energies(4))
+
+
+        
+
+
+
+
