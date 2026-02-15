@@ -23,9 +23,10 @@ You can then use this to give predictions for the energy and produce plots of th
 Completed.
 
 Further tasks it can do:
-- Calculate binding energies for given l and energy range (which is automatically input), numerically find radial wavefunction until divergence
-- For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip)
-- Finds decay widths for various processes according to QCD formulae: lepton, hadronic, magnetic and radiative decay
+- Calculate binding energies for given l and energy range (which is automatically input), numerically find radial wavefunction until divergence.
+- For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip).
+- Finds decay widths for various processes according to QCD formulae: lepton, hadronic, magnetic and radiative decay.
+- Optimise the strong coupling constant by using finding minimum difference between numerical and experimental values, using analytic relationships. 
 Next up: clearing up the code, making plots, making photon spectra for j/psi, investigating higher energies, implementing stewart clark lecture content, investigating errors more rigorously. 
 
 
