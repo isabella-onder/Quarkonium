@@ -199,7 +199,6 @@ def c_ratio_chi_squared():
     print('###################################################################### \n','These are the optimal theo widths', c_ratio_theo_widths_optimal, '\n #####################################################################')
     print('###################################################################### \n','These are the original theo widths', c_ratio_theo_widths_original, '\n #####################################################################')
     print('###################################################################### \n','These are the experimental widths', c_ratio_exp_widths, '\n #####################################################################')
-    print('this was deemed the optimal alpha', optimal_alpha)
     print('these are the optimal alpha from least to most', optimal_alphas)
 
     plt.plot(alpha_arr, chi_squared_arr, color = 'chocolate')
@@ -258,3 +257,5 @@ cex_chi_squared()
 
 
 
+#optimal_alpha_b = 0.17131313131313133
+#optimal_alpha_c = 0.26121212121212123 

@@ -3,8 +3,18 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
+from matplotlib.ticker import FuncFormatter
 
+import sys
+import os
 
+# Get the parent directory (quarkonium)
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Add it to Python's module search path
+sys.path.append(parent_dir)
+
+# Now you can import bex
+import cextension as cex
 
 #here I want the code to just make the animation: keep it as a separate function of its own, as I may want to tweak things specifically
 
@@ -87,7 +97,7 @@ def evolve_system(NA, NB, NC, ND, NE, NF, rules, n_steps):
 
 ##############################################################################################################
 n_steps = 200
-t_total = 0.00000000001
+t_total = 0.6
 dt = t_total/n_steps
 
 xs = []
@@ -98,30 +108,40 @@ xs1 = []
 for k in range((n_steps)):
     xs.append(t_total + dt*(k+1))
 
-
+#so that the plot does not have to do rounding
+norm = 1e20
 
 ##############################################################################################################
 #here I will put in all the half lifetimes##########################################################################
 ##############################################################################################################
-sec = 6.5821195695091*10**(-16+9) #converting eV to seconds
-width = 92.6 *10**3 #the total width in eV
+sec = 6.5821195695091*10**(-25) #converting eV to seconds
 
 #inputting percentages from pdg live - by def of a width, is already related to lambda
-t_av_hadrons = 1/(0.1346 * width) * sec 
-print(t_av_hadrons)
-t_av_threeg = 1/(0.641 * width) * sec
-t_av_onetwo = 1/(0.088 * width) * sec
-t_av_positron = 1/(0.05971 * width) * sec
-t_av_muon = 1/(0.05961 * width) * sec
-
-#t_av_mag = 1/(0.0141 * width) * sec
+t_av_lepton = 1/(7.280512344830004e-06) * sec * norm
+print(t_av_lepton)
+t_av_threeg = 1/(0.00011926244881362586) * sec * norm
+t_av_onegtwog = 1/(4.25946299007362e-05) * sec * norm
+t_av_hyperfine = 1/(4.0329025298413605e-06) *sec * norm
+t_av_three_photons = 1/( 2.893706136131085e-08)*sec*norm
 
 
-p_B = 1 - np.exp(-dt/t_av_hadrons)
+
+
+#B: lepton
+p_B = 1 - np.exp(-dt/t_av_lepton)
+
+#C: three gluons
 p_C = 1 - np.exp(-dt/t_av_threeg)
-p_D = 1 - np.exp(-dt/t_av_onetwo)
-p_E = 1 - np.exp(-dt/t_av_positron)
-p_F = 1 - np.exp(-dt/t_av_muon)
+
+#D: one photon two gluons
+p_D = 1 - np.exp(-dt/t_av_onegtwog)
+
+#E: hyperfine, going to eta_c
+p_E = 1 - np.exp(-dt/t_av_hyperfine)
+
+#F: three photons
+p_F = 1- np.exp(-dt/t_av_three_photons)
+
 
 
 ##############################################################################################################
@@ -156,7 +176,7 @@ y_a_tot,y_b_tot,y_c_tot, y_d_tot, y_e_tot, y_f_tot = run()
 
 fig, ax = plt.subplots()
 
-plt.xlabel('time (s)')
+plt.xlabel('time ($10^{-20} s$)')
 plt.ylabel('Number of particles in given state')
 
 
@@ -169,6 +189,8 @@ plot_E = ax.plot(xs+xs1, y_e_tot,label = 'E' , linewidth = 3)[0]
 plot_F = ax.plot(xs+xs1, y_f_tot,label = 'F', linewidth = 3 )[0]
 #ax.legend(loc = ' right')
 ax.legend()
+ax = plt.gca()
+ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f'{x/10:g}'))
 plt.title('Evolution of particle count according to state')
 
 
@@ -203,6 +225,7 @@ def update(frame):
 ani = animation.FuncAnimation(fig=fig, func=update, frames=400, interval=30, repeat = False)
 
 #if I want to save, just need to unhash
-#animation. Animation.save(ani, 'j_psi_decay_animation.gif')
+#animation.Animation.save(ani,'animations/formative_charm_num.gif')
+
 plt.show()
 

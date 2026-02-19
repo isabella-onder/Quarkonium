@@ -157,5 +157,11 @@ def beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax):
 
 
 #beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax)
-beta_range_finder(0,1.27,1.27, 0.4381 ,0.40,[0.10,0,0.25], 10)
 
+#for when I tried doing it with the actual value of the strong coupling constant
+#beta_range_finder(0,1.27,1.27, 0.4381 ,0.225,[0.10,0,0.15], 12)
+
+#doing it for charmonium
+#beta_range_finder(0,1.27,1.27, 0.4377 ,0.38,[0.16,0,0.23], 12)
+
+beta_range_finder(0,4.183,4.183, 1.0327 ,0.33,[0.16,0,0.23], 12)

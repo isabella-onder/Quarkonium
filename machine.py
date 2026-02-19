@@ -28,7 +28,7 @@ real_energy_c = {
     (1,0): 0.4380, 
     (1,1): 0.9,
     (1,2): 1.2,
-    (2,0): 1.1,
+    (2,0): 1.1
 }
 
 
@@ -45,7 +45,7 @@ def get_energy_range(n, l, type):
 
 def charmonium(n,l):
     quark = 'CHARM'
-    E_n, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
+    E_n, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta_c, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
 
     print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l} is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
     return E_n
@@ -53,10 +53,10 @@ def charmonium(n,l):
 def bottonium(n,l):
     quark = 'BOTTOM'
 
-    E_n, _ , u , v, r = output(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta, rmax )
+    E_n, _ , u , v, r = output(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta_b, rmax )
     print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
     return E_n
 
     
 #charmonium(1,0)
-#bottonium(1,0)
+bottonium(2,0)

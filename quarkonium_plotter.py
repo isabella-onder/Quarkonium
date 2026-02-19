@@ -36,7 +36,7 @@ def sch_solver(l,m_1,m_2,  alpha, beta): #passing all system parameters as argum
     a0 = 268101.76125244756  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
     r0 = 1e-8 * a0     # small start
-    rmax = 5.5   # extend beyond peak
+    rmax = 8   # extend beyond peak
     print('this is rmax',rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -78,7 +78,7 @@ def sch_solver(l,m_1,m_2,  alpha, beta): #passing all system parameters as argum
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(0,1.273,1.273,0.40,0.210083)
+sch_solver(0,1.273,1.273,0.225,0.14345703124999998)
 
 #plan: check by inputting correct values that it plots correct thing
 #accordingly, correct quarkonium and beta. Also, make sure that beta finder is indeed appropriate
