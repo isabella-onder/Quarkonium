@@ -205,7 +205,6 @@ def update(frame):
 ani = animation.FuncAnimation(fig=fig, func=update, frames=400, interval=30, repeat = False)
 
 #if I want to save, just need to unhash
-#ani.save('formative_presentation.gif', writer='pillow', fps=20)
-ani.save("animation.gif", writer=PillowWriter(fps=20))
+
 plt.show()
 
