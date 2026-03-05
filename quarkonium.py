@@ -175,13 +175,13 @@ def energy_range_finder(l,m_1,m_2, E_range, alpha, beta, rmax):
 
     return E_n, final_node, u, v, r
 
-
+plot = False
 def output(l,m_1,m_2, E_range, alpha, beta, r):
-    E_nl, rmax, u, v, r = energy_range_finder(l,m_1,m_2, E_range, alpha, beta, r)
+    E_nl, rmax, u_in, v_in, r = energy_range_finder(l,m_1,m_2, E_range, alpha, beta, r)
     if E_nl == 'INVALID E_N':
         return 'nope'
     
-    #print('This is rmax', rmax)
+    print('This is rmax', rmax)
     #print('This is the estimated E_nl', E_nl)
     
     #plotting it one final time with the estimated E_nl and with rmax
@@ -203,6 +203,12 @@ def output(l,m_1,m_2, E_range, alpha, beta, r):
     #print('U this is normalised check: hopefully one', normalised_check)
     normalised_u_squared = normalised_u**2
 
+    if plot:
+        #a0 = 268101.76125244756
+        plt.scatter(r_1, normalised_u, marker = '.')
+        plt.show()
+
+
 
     #try to normalise v
     normalised_v = v/(np.sqrt(integral))
@@ -218,5 +224,5 @@ def output(l,m_1,m_2, E_range, alpha, beta, r):
 #output(0,1.2730,1.2730,[0, 0,0.5],0.40,0.210083, 30)
 #energy_range_finder(0,1.27,1.27,[0.8, 00,0.5],0.40,0.2100830078125,30)
 
-#plotter_and_normaliser(0,4.183,4.183,[1.4, 0,1.8],0.28,0.2100830078125,60)
+plotter_and_normaliser(0,4.183,4.183,[1, 0,1.2],0.28,0.2100830078125,60)
 

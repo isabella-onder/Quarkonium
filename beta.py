@@ -164,4 +164,6 @@ def beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax):
 #doing it for charmonium
 #beta_range_finder(0,1.27,1.27, 0.4377 ,0.38,[0.16,0,0.23], 12)
 
-beta_range_finder(0,4.183,4.183, 1.0327 ,0.33,[0.16,0,0.23], 12)
+beta_range_finder(0,4.7,4.7, 1.0325 ,0.28,[1,0,1.5], 12)
+#0.15634765625
+#0.22587890624999998

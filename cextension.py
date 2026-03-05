@@ -49,7 +49,7 @@ def origin_c(n):
     print('this is the first 2 v ', v[0], v[1], v[5], v[1000])
     return origin, u, v, r
 
-#origin_c(1)
+#origin_c(2)
 
 
 
@@ -59,13 +59,13 @@ def origin_c(n):
 def hyperfine_splitting(n):
     origin_values, _, _, _ = origin_c(n)
     u_0, v_0 = origin_values
-    v_0 = 0.7699520112846642
+    #v_0 = 0.7699520112846642
     delta_e = 8/9 * c.alpha_c/c.m_c**2 * v_0**2 
     print('these are the origin values u, v', origin_values)
     print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
     return delta_e
 
-#hyperfine_splitting(1)
+hyperfine_splitting(1)
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split

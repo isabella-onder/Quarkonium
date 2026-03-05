@@ -25,18 +25,16 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2,  alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
-    E_nl = 0.43707275390625 +  0.18363783847304116
-    E_nl = 0.43707275390625
-    #E_nl = 0.73471
-    #mu = (1/m_1 + 1/m_2) ** (-1)
-    mu = 1.273/2
+def sch_solver(l,m_1,m_2,  alpha, beta, E_nl): #passing all system parameters as arguments to make adaptable code for different particles
+   
+    mu = (1/m_1 + 1/m_2) ** (-1)
+  
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 268101.76125244756  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
     r0 = 1e-8 * a0     # small start
-    rmax = 8   # extend beyond peak
+    rmax = 3 # extend beyond peak
     print('this is rmax',rmax)
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
@@ -78,7 +76,8 @@ def sch_solver(l,m_1,m_2,  alpha, beta): #passing all system parameters as argum
 
     return(nodes_nb, turning_points_nb, u, r)
 
-sch_solver(0,1.273,1.273,0.225,0.14345703124999998)
-
+sch_solver(0,4.7,4.7,0.28, 1.31060791015625, 1.0325)
+#0.15634765625
+#0.22587890624999998
 #plan: check by inputting correct values that it plots correct thing
 #accordingly, correct quarkonium and beta. Also, make sure that beta finder is indeed appropriate
