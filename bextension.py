@@ -84,16 +84,16 @@ def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hy
 
 
 #at the start of each one I would do the same values called hence a function:
-def header():
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_b(1)
-    energy = machine.bottonium(1,0)
+def header(n):
+    M = extracting_mass(n,0,True)
+    origin_values, _, _, _ = origin_b(n)
+    energy,_,_ = machine.bottonium(n,0)
     
     u_0, v_0 = origin_values #we approx v_0 as R(0)
 
     #getting the correct v0
-    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(1) , c.alpha_b, c.beta_b, c.rmax)
-    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(1), c.alpha_b, c.beta_b, lep_final_node_1)
+    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(n) , c.alpha_b, c.beta_b, c.rmax)
+    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(n), c.alpha_b, c.beta_b, lep_final_node_1)
     lep_integral_to_normalise = sp.integrate.simpson(lep_u**2,lep_r)                   
     lep_normalised_u = lep_u/(np.sqrt(lep_integral_to_normalise))
     print('these are the first values lep_v and hyperv', lep_v[0]/lep_integral_to_normalise)
@@ -103,7 +103,7 @@ def header():
     print(M, energy, v_0, lep_normalised_v[0])
     return M, energy, v_0, lep_normalised_v[0]
 
-#header()
+header(2)
 
 M = 9.43290539176862 #GeV total mass of B n = 1 spin up
 energy = 1.03314208984375 #GeV energy of binding energy of n = 1 l = 0
@@ -258,7 +258,7 @@ def alternative_mag_transition(n):
     
     #using the given formula for magnetic transition, using the previously found splitting energy (fine or hyperfine?)
     gamma_width = 4 * alpha_em * e_Q**2 /(3*(c.m_b)**2) * (1+kappa_Q)**2 *k_gamma**3 * integral
-    #print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
+    print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
     return gamma_width
 #alternative_mag_transition(1)
 

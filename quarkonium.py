@@ -27,7 +27,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
     initial_conditions = [0,1]    #because we want u(0) = 0, du(0)/dr = v(0) = 1
 
     a0 = 268101.76125244756 # Bohr radius in GeV^-1
-    r0 = 1e-18 * a0     # small start
+    r0 = 1e-9 * a0     # small start
 
     r_eval = np.linspace(r0,rmax,30000)  #points to evaluate u(r) at, called by solve_ivp
 
@@ -52,6 +52,8 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
     #print('these are the turning points location', turning_points_location)
     turning_points_nb = len(turning_points_location)
 
+    #plt.scatter(r,u)
+    #plt.show()
 
 
     return nodes_nb, turning_points_nb, u, v, r, final_node
@@ -65,7 +67,7 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
 
         E_2 = (energies[0] + energies[-1])/2            #bisecting energy range to start iterating
         energies = [energies[0], E_2 , energies[-1]]
-        #print(energies)
+        print(energies)
     
 
         turning_points_nb = []
@@ -76,8 +78,9 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
             n_nb, tp_nb, u, v, r, final_node= sch_solver(l, m_1, m_2, E_nl, alpha, beta, rmax)
             nodes_nb.append(n_nb)
             turning_points_nb.append(tp_nb)
-        #print (nodes_nb, turning_points_nb)
+        print (nodes_nb, turning_points_nb)
 
+       
         
         #replacing one side such as to narrow down depending on which side has different number of turning points/nodes
         if nodes_nb[0] != nodes_nb[1] and turning_points_nb[0] != turning_points_nb[1]:
@@ -86,15 +89,14 @@ def energy_finder(l, m_1, m_2, energies, alpha, beta, rmax):   #input list with 
         elif nodes_nb[1] != nodes_nb[2] and turning_points_nb[1] != turning_points_nb[2]:
             #print('E_2 and E_3 are different')
             energies[0] = energies[1]
-
+        
         else:
             print('something is wrong: the range is incorrect (or perhaps they are not yet close enough?)') #make sure that this really is the only scenario
             return('INVALID E_N', 'SO NO NODE', 'oops', 'oops', 'oops')
             break
 
     
-
-        
+       
 
     return energies[1], final_node, u, v, r
     
@@ -222,7 +224,11 @@ def output(l,m_1,m_2, E_range, alpha, beta, r):
         
 #plotter_and_normaliser(0,1.2730,1.2730,[0, 0,0.5],0.40,0.210083,30)
 #output(0,1.2730,1.2730,[0, 0,0.5],0.40,0.210083, 30)
-#energy_range_finder(0,1.27,1.27,[0.8, 00,0.5],0.40,0.2100830078125,30)
+#energy_range_finder(1, 4.183, 4.183, [1.4,0,1.6], 0.33, 1.348327636718755,30)
+#energy_range_finder(0, 4.183, 4.183, [1.1,0,1.8], 0.33, 1.348327636718755,4)
 
-plotter_and_normaliser(0,4.183,4.183,[1, 0,1.2],0.28,0.2100830078125,60)
+#plotter_and_normaliser(0,4.183,4.183,[1, 0,1.2],0.28,0.2100830078125,60)
 
+#1.3223388671875 hopefully the final energy for l - 1 
+#
+# 2.42474365234375 probably the n = 4, l = 0

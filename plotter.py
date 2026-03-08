@@ -77,9 +77,10 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     axs[1].scatter(r/a0, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
     plt.show()
 
-    return(nodes_nb, turning_points_nb, u, r)
+    return(nodes_nb, turning_points_nb, u,  r)
 
-#sch_solver(0,0.000511,100000000000,5,1/137,0)
+
+sch_solver(0,0.000511,100000000000,5,1/137,0)
 
 def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
     E_nl = hydrogen_energies(n)
@@ -99,9 +100,11 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
 
     r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 4))
+
     labels = ['+0.1eV', '$E_{3,0}$ analytic', '-0.1eV'] #too high, perfect, too low
-    colours = [ "#95C4F0", 'black', "#206C90"]
+    colours = [ "#95C4F0", 'gold', "#206C90"]
+    #colours = [ "#D48026", 'gold', "#2E8EBB"]
     #colours = ['grey', '#B1D0ED', , '#156082']
     #colours = ['darkseagreen', 'grey', 'peru']
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
@@ -145,8 +148,10 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     plt.xticks(size = 18)
     plt.yticks(size = 18)
     plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
-    plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
-    plt.savefig("figs/divergence_plot_2.svg", bbox_inches = 'tight')
+    #plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
+    plt.savefig("summative/divergence_plot_2.svg", bbox_inches = 'tight')
+    plt.savefig("summative/divergence_plot_2.png", bbox_inches = 'tight')
+
     plt.show()
     print(nodes_nb, turning_points_nb)
 

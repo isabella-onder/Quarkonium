@@ -25,7 +25,7 @@ def zero_crossing(r, Y, l, mu, E, alpha, beta):
     u, v = Y
     return u     #trigger function to find when u == 0, called by solve_ivp
 
-def sch_solver(l,m_1,m_2,  alpha, beta, E_nl): #passing all system parameters as arguments to make adaptable code for different particles
+def sch_solver(l,m_1,m_2,  alpha, beta, E_nl, rmax): #passing all system parameters as arguments to make adaptable code for different particles
    
     mu = (1/m_1 + 1/m_2) ** (-1)
   
@@ -33,11 +33,12 @@ def sch_solver(l,m_1,m_2,  alpha, beta, E_nl): #passing all system parameters as
 
     a0 = 268101.76125244756  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
-    r0 = 1e-8 * a0     # small start
-    rmax = 3 # extend beyond peak
+    r0 = 1e-9 * a0     # small start
+    
+    #rmax = 6.3# extend beyond peak
     print('this is rmax',rmax)
 
-    r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,15100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
@@ -62,7 +63,7 @@ def sch_solver(l,m_1,m_2,  alpha, beta, E_nl): #passing all system parameters as
 
 
 
-    fig, axs = plt.subplots(1,2)
+    #fig, axs = plt.subplots(1,2)
 
     #axs[0].scatter(r,u, marker = '.')             #remove plotting for now since otherwise plots it every iteration
     integral = sp.integrate.simpson(u**2,r)                           #evaluating integral over all u_nl to then normalise by result
@@ -70,14 +71,30 @@ def sch_solver(l,m_1,m_2,  alpha, beta, E_nl): #passing all system parameters as
     normalised_check = sp.integrate.simpson(normalised_u**2, r)
     print('this is normalised check: hopefully one', normalised_check)
 
-    axs[0].scatter(r, normalised_u, marker = '.')                        #plot u_nl(r) normalised
-    axs[1].scatter(r, normalised_u**2, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
-    plt.show()
+    #axs[0].scatter(r, u, marker = '.')                        #plot u_nl(r) normalised
+    #axs[1].scatter(r, normalised_u, marker = '.')                     #plot |u_nl(r)|**2 normalised (probability density function)
+    #plt.show()
 
-    return(nodes_nb, turning_points_nb, u, r)
+    return(nodes_nb, turning_points_nb, normalised_u, r)
 
-sch_solver(0,4.7,4.7,0.28, 1.31060791015625, 1.0325)
+#sch_solver(0,4.7,4.7,0.28, 1.31060791015625, 1.0325) #n = 1
+#sch_solver(0,4.183,4.183,0.33, 1.348327636718755, 1.0327)
+
+#sch_solver(0,4.183,4.183,0.33, 0.71376953125, 1.3223388671875) #rmax = 
+
+#sch_solver(0,4.7,4.7,0.28, 1.31060791015625, 1.0325) #n = 1
+
+
+#sch_solver(0,4.7,4.7,0.28, 1.31060791015625, 0.5418945312500001) #n = 1
+
+#sch_solver(0,4.183,4.183,0.33, 1.348327636718755, 1.0327, 3) #n=1, r0 = 1e-9, rmax = 3
+#sch_solver(0,4.183, 4.183, 0.33, 0.71376953125, 1.633) #n = 2 rmax = 5.5
+#sch_solver(0,4.183, 4.183, 0.33, 0.71376953125, 2.42474365234375) #n = 3 rmax = 5.5
+#sch_solver(0,4.183, 4.183, 0.33, 0.71376953125, 3.09832763671875) #n = 4, rmax = 6.3
+
 #0.15634765625
 #0.22587890624999998
 #plan: check by inputting correct values that it plots correct thing
 #accordingly, correct quarkonium and beta. Also, make sure that beta finder is indeed appropriate
+
+

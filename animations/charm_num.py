@@ -14,7 +14,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
 
 # Now you can import bex
-import cextension as cex
+#import cextension as cex
 
 #here I want the code to just make the animation: keep it as a separate function of its own, as I may want to tweak things specifically
 
@@ -160,7 +160,7 @@ def run() :
     ##############################################################################################################
     #here i will put in all the possible populations - they all start with 0 except for J/psi
     ##############################################################################################################
-    NA = 1000
+    NA = 10000
     NB = 0
     NC = 0
     ND = 0
@@ -177,23 +177,44 @@ y_a_tot,y_b_tot,y_c_tot, y_d_tot, y_e_tot, y_f_tot = run()
 fig, ax = plt.subplots()
 
 plt.xlabel('time ($10^{-20} s$)')
-plt.ylabel('Number of particles in given state')
+plt.ylabel('Percentage of particles in given state')
 
 
 x_axis = xs+xs1
-plot_A = ax.plot(x_axis, y_a_tot,label = 'A', linewidth = 3)[0]
-plot_B = ax.plot(xs+xs1, y_b_tot,label = 'B', linewidth = 3 )[0]
-plot_C = ax.plot(xs+xs1, y_c_tot,label = 'C', linewidth = 3 )[0]
-plot_D = ax.plot(xs+xs1, y_d_tot,label = 'D', linewidth = 3 )[0]
-plot_E = ax.plot(xs+xs1, y_e_tot,label = 'E' , linewidth = 3)[0]
-plot_F = ax.plot(xs+xs1, y_f_tot,label = 'F', linewidth = 3 )[0]
+plot_A = ax.plot(x_axis, y_a_tot/10,label = r'$J/\psi$', linewidth = 3, color = 'firebrick')[0]
+plot_B = ax.plot(xs+xs1, y_b_tot/10,label = r'$\ell\bar{\ell}$', linewidth = 2 , alpha = 0.6, color = 'grey', linestyle = ':')[0]
+plot_C = ax.plot(xs+xs1, y_c_tot/10,label = r'$ggg$', linewidth = 2, alpha = 0.6, color = 'grey', linestyle = '-.')[0]
+#plot_D = ax.plot(xs+xs1, y_d_tot,label = r'$\gamma gg$', linewidth = 2, alpha = 0.6, color = 'grey', linestyle = ':')[0]
+plot_E = ax.plot(xs+xs1, y_e_tot/10,label = r'$\eta_c(1S)$' , linewidth = 2, alpha = 0.6, color = 'grey', linestyle = '--')[0]
+#plot_F = ax.plot(xs+xs1, y_f_tot,label = r'$\gamma \gamma \gamma$', linewidth = 2, alpha = 0.6, color = 'grey' )[0]
+
+print(y_a_tot)
+y_target = 2000/10 # horizontal line level
+# Find intersection using interpolation
+
+y_a_target = 2000
+index = min(range(len(y_a_tot)), key=lambda i: abs(y_a_tot[i] - y_a_target))
+x_intersect = x_axis[index]
+      
+#indices = [i for i, v in enumerate(y_a_tot) if v in (1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000, 2001, 2002,2003,2004,2005,2006,2007,2008,2009,2010)]
+#x_intersect = [x_axis[indices[0]]]
+plt.ylim(0,10000/10)
+plt.xlim(0,1.2)
+plt.hlines(y_target, 0, x_intersect, linestyle = '--', color = 'black', linewidth = 2)
+
+# vertical line down to x-axis
+plt.vlines(x_intersect, 0, y_target, linestyle = '--', color = 'black', linewidth = 2)
+
 #ax.legend(loc = ' right')
 ax.legend()
 ax = plt.gca()
 ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f'{x/10:g}'))
+plt.savefig('summative/jpsi_plot.png', bbox_inches = 'tight')
+#plt.savefig('summative/jpsi_plot.svg', bbox_inches = 'tight')
+
 plt.title('Evolution of particle count according to state')
 
-
+'''
 def update(frame):
     # for each frame, update the data stored on each artist.
     x = x_axis[:frame]
@@ -226,6 +247,6 @@ ani = animation.FuncAnimation(fig=fig, func=update, frames=400, interval=30, rep
 
 #if I want to save, just need to unhash
 #animation.Animation.save(ani,'animations/formative_charm_num.gif')
-
+'''
 plt.show()
 

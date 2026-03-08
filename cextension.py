@@ -49,7 +49,7 @@ def origin_c(n):
     print('this is the first 2 v ', v[0], v[1], v[5], v[1000])
     return origin, u, v, r
 
-#origin_c(2)
+#origin_c(1)
 
 
 
@@ -65,7 +65,7 @@ def hyperfine_splitting(n):
     print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
     return delta_e
 
-hyperfine_splitting(1)
+#hyperfine_splitting(2)
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split
@@ -78,15 +78,15 @@ def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hy
     return extracted_mass
 
 #at the start of each one I would do the same values called hence a function:
-def header():
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_c(1)
-    energy = machine.charmonium(1,0)
+def header(n):
+    M = extracting_mass(n,0,True)
+    origin_values, _, _, _ = origin_c(n)
+    energy, _, _ = machine.charmonium(n,0)
     
     u_0, v_0 = origin_values #we approx v_0 as R(0)
     #getting the correct v0
-    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1) , c.alpha_c, c.beta_c, c.rmax)
-    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1) , c.alpha_c, c.beta_c, lep_final_node_1)
+    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(n) , c.alpha_c, c.beta_c, c.rmax)
+    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(n) , c.alpha_c, c.beta_c, lep_final_node_1)
     lep_integral_to_normalise = sp.integrate.simpson(lep_u**2,lep_r)                   
     lep_normalised_u = lep_u/(np.sqrt(lep_integral_to_normalise))
     print('these are the first values lep_v and hyperv', lep_v[0]/lep_integral_to_normalise)
@@ -97,17 +97,24 @@ def header():
     return M, energy, v_0, lep_normalised_v[0]
 
 
-#header()
+#header(2)
 
 #because we are only doing the same, J/psi every time: no need to compute every time. 
 # If necessary, change header and then change these values
 M = 3.1434377800058737 #GeV total mass of the state
 energy = 0.43695068359375 #Gev binding energy of ground state as found by solver
-v_0 = 0.9148623504190927 #value at origin for eta_c
+v_0 = 0.9148623504190927 #value at origin for eta_c(1S)
 lep_normalised_v = 1.3096702583455615 #value at origin for J/psi
-
+#v_0 = 0.7442660513414027 #value at origin for eta_c(2S)
+#lep_normalised_v = 
 #testing to see original values: taking M = 2*m_c and v(0) for eta_c as wavefunction at origin
 radial_at_origin_eta = 0.7699520112846642 #value at origin for eta_c
+
+#for S-2 instead
+M = 3.143051527611561
+energy = 1.09658203125
+v_0 = 0.7442660513414027
+lep_normalised_v = 0.8498642794425497
 
 if wrong_origin:
     M = 2 * c.m_c
@@ -120,7 +127,8 @@ def lepton_decay(alpha):
     lepton_width_o = 4 * (1/137)**2 * c.e_c**2/M**2 * v_0**2 *(1 - 16/3 * alpha/np.pi) #using the full version from one of the papers (though still not entire)
     lepton_width = 4 * (1/137)**2 * c.e_c**2/M**2 * lep_normalised_v**2 *(1 - 16/3 * alpha/np.pi) #using the full version from one of the papers (though still not entire)
     alternative_width = (16*np.pi *(1/137)**2*c.e_c**2)/M**2 * (1-4*c.m_c**2/M**2)**(1/2) * (1+2*c.m_c**2/M**2) * Psi**2
-    #print('this is the lepton width', lepton_width,  'whereas the real one is', lepton_positron_percent*total_width)
+    print('this is the lepton width', lepton_width,  'whereas the real one is', lepton_positron_percent*total_width)
+    print('this is the alternative lepton width', alternative_width)
     return lepton_width
 #lepton_decay(c.alpha_c)
 
@@ -236,7 +244,7 @@ def alternative_mag_transition(n):
     kappa_Q = 4/3 * c.alpha_c/(2*np.pi)
 
     #need to input the energy here
-    energy = machine.charmonium(1,0) #GeV, as pdt by charmonium(1,0) in machine.py
+    energy, _, _ = machine.charmonium(1,0) #GeV, as pdt by charmonium(1,0) in machine.py
 
     k_gamma = (hyperfine_splitting(n)) #assuming it is indeed in N.U., otherwise need to divide by c
     k_gamma = 0.11
@@ -271,7 +279,7 @@ def alternative_mag_transition(n):
     print('Magnetic transition width', gamma_width/total_width, 'in fraction form using the alternative mag transition')
 
     return gamma_width
-#alternative_mag_transition(1)
+alternative_mag_transition(2)
 
 
 #using the ratio formulae in a paper to see whether they are better approx

@@ -41,7 +41,7 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,rmax):
     a0 = 268101.76125244756 # Bohr radius in GeV^-1
     r0 = 1e-9 * a0     # very small start to avoid odd behaviour at 0
 
-    r_eval = np.linspace(r0,rmax,1510)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,15100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
@@ -164,6 +164,7 @@ def beta_range_finder(l,m_1,m_2, E, alpha, beta_range, rmax):
 #doing it for charmonium
 #beta_range_finder(0,1.27,1.27, 0.4377 ,0.38,[0.16,0,0.23], 12)
 
-beta_range_finder(0,4.7,4.7, 1.0325 ,0.28,[1,0,1.5], 12)
+#beta_range_finder(0,4.183,4.183, 1.0327 ,0.33,[0.7,0,0.725], 3)
+#beta_range_finder(0,4.183,4.183, 1.633 ,0.33,[0.7,0,0.725], 5)
 #0.15634765625
 #0.22587890624999998
