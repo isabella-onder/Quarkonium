@@ -69,7 +69,7 @@ def hyperfine_splitting(n):
     print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
     return delta_e
 
-#hyperfine_splitting(1)
+hyperfine_splitting(4)
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split
@@ -103,7 +103,7 @@ def header(n):
     print(M, energy, v_0, lep_normalised_v[0])
     return M, energy, v_0, lep_normalised_v[0]
 
-header(2)
+#header(2)
 
 M = 9.43290539176862 #GeV total mass of B n = 1 spin up
 energy = 1.03314208984375 #GeV energy of binding energy of n = 1 l = 0

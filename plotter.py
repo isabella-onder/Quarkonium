@@ -1,6 +1,7 @@
 import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
 #important to note: using h_bar = c = 1
 
@@ -80,12 +81,13 @@ def sch_solver(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arg
     return(nodes_nb, turning_points_nb, u,  r)
 
 
-sch_solver(0,0.000511,100000000000,5,1/137,0)
+#sch_solver(0,0.000511,100000000000,5,1/137,0)
 
 def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as arguments to make adaptable code for different particles
     E_nl = hydrogen_energies(n)
     E_up = E_nl - 0.1 * 1e-9
     E_down = E_nl + 0.1 * 1e-9
+    E_list = [E_down,E_nl,E_up]
     E_list = [E_down,E_nl,E_up]
     print('this is E_list', E_list)
     mu = 0.0005110362180000001
@@ -94,7 +96,8 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     a0 = 1/(mu*alpha)  # Bohr radius in GeV^-1
     print(a0, 'this is a0')
     r0 = 1e-6 * a0     # small start
-    rmax = 33* a0     # extend beyond peak
+    #rmax = 33* a0     # extend beyond peak
+    rmax = 8*a0
     #rmax = 7678791.00312025
 
 
@@ -103,12 +106,21 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     fig, ax = plt.subplots(figsize=(8, 4))
 
     labels = ['+0.1eV', '$E_{3,0}$ analytic', '-0.1eV'] #too high, perfect, too low
-    colours = [ "#95C4F0", 'gold', "#206C90"]
+    colours = [ "#68B3D9", '#C85A5A', "#206C90"]
+    colours = [ "#68B3D9", 'firebrick', "#206C90"]
+    #colours = ["#CE9300", '#D00000', '#6A040F']
+    #colours = ['#264653',"#EDC45F",  '#81171B' ]
+    #colours = [ "#68B3D9", "#C85A5A", "#226CB2"]
+    #colours = [ "#8698A1", "cornflowerblue", "#314252"]
+    #colours = [ "#67958D", "gold", "#5C869A"]
+
+    #colours ["#559288", "gold", "#297599"]
     #colours = [ "#D48026", 'gold', "#2E8EBB"]
     #colours = ['grey', '#B1D0ED', , '#156082']
     #colours = ['darkseagreen', 'grey', 'peru']
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-    for e,colour,label in zip(E_list, colours,labels):
+    sizes = [5,20,5]
+    for e,colour,label,size in zip(E_list, colours,labels,sizes):
         print('this is the current e', e)
         sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, e, alpha, beta), events = zero_crossing) 
         u, v = sol.y[0], sol.y[1] 
@@ -141,20 +153,34 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
         print('this is normalised check: hopefully one', normalised_check)
 
             
-        plt.scatter(r/a0, normalised_u * 10**4, marker = '.', s = 7, color = colour, label=label)                     #plot |u_nl(r)|**2 normalised (probability density function)
+        plt.scatter(r/a0, normalised_u * 10**4, marker = '.', s = size, color = colour, label=label)                     #plot |u_nl(r)|**2 normalised (probability density function)
     ax.axhline(y=0, color='grey', linestyle='--')
-    plt.xlabel('Separation $r$ ($a_0$)', size = 18)
+    #plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
+    plt.minorticks_on()
+    plt.tick_params( direction = 'in', width = 1.4, length = 6)
+    plt.tick_params( which =  'minor', direction = 'in') 
+    #plt.tick_params(which='minor', length=4, color='grey') 
+    #ax.xaxis.set_minor_locator(MultipleLocator(5))
+    plt.xlim(xmin = 0)
+    
+    
+    #ax.yaxis.set_minor_locator(MultipleLocator(5))
+
+    ax.xaxis.tick_top()
+    ax.xaxis.set_label_position('top') 
+    ax.set_xlabel('Separation $r$ ($a_0$)', size = 18, labelpad = 10)
+   # plt.tick_params(top = True, labeltop=True)
     plt.ylabel('$u_{nl}(r)$  $(10^{-4})$', size = 18)
     plt.xticks(size = 18)
     plt.yticks(size = 18)
-    plt.tick_params(which = 'major', bottom = True,  left = True,  direction = 'in') 
+    
     #plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
     plt.savefig("summative/divergence_plot_2.svg", bbox_inches = 'tight')
     plt.savefig("summative/divergence_plot_2.png", bbox_inches = 'tight')
 
-    plt.show()
+    #plt.show()
     print(nodes_nb, turning_points_nb)
 
     return(nodes_nb, turning_points_nb, u, r)
 
-plotter(0,0.000511,100000000000,3,1/137,0)
+plotter(0,0.000511,100000000000,1,1/137,0)

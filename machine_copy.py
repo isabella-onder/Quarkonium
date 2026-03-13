@@ -130,12 +130,27 @@ def plots():
     
     names = ['1S', '1P', '1D']
     colours = ['firebrick', 'chocolate', 'gold']
-
+    colours = ['#81171B', '#C75146', '#EA8C55']
+    colours = ['#E9C46A', '#C75146', '#81171B']
+    colours = ["#EDC45F", 'chocolate', "#911A1E"]
+    colours = ["#FFB700", "#D9673A", '#81171B']
+   
     names_b = ['1S', '2S', '3S']
     #colours_b = ['royalblue', 'cornflowerblue', 'lightblue']
     colours_b = ['firebrick', 'cornflowerblue', 'mediumseagreen']
     colours_b = ['firebrick', "#7471B1", "#599AB8" ]
-    for n_l, name, colour in zip(energy_ranges_c, names, colours):
+    colours_b = ['#EDC45F', "#36A8BA", '#264653']
+    colours_b = ["#FFB700", "#36A8BA", '#264653']
+    #colours_b = ['#81171B', '#006868',]
+    sizes = [2.5,1,1]
+
+    #analytic_c = [0.4381, 0.86871, 1.227]
+    #analytic_b = [1.0327,  1.633, 1.989]
+    #for E_c, E_b in zip(analytic_c, analytic_b):
+    #    ax3.hlines(y=E_c, xmin=0.075, xmax=0.425, linewidth = 1, color = 'black')
+    #    ax3.hlines(y=E_b, xmin=0.575, xmax=0.92, linewidth = 1, color = 'black')
+
+    for n_l, name, colour, size in zip(energy_ranges_c, names, colours,sizes):
         E, u, r = charmonium(n_l[0], n_l[1])
 
         ax3.hlines(y=E, xmin=0.075, xmax=0.425, linewidth = 2, color = colour)
@@ -148,8 +163,9 @@ def plots():
         ax3.text(0.18, E+0.06, f'{name}', va='center', weight = 450, fontsize = 12)
         ax3.set_ylabel('Binding energy $E_{nl}$', labelpad = 12)
         #axs[0,1].set_ylim(0.3, 1.4)
+        #ax3.set_ylim()
 
-        ax1.scatter(r, u, label = str(n_l), marker = '.', s = 2, color = colour)
+        ax1.scatter(r, u, label = str(n_l), marker = '.', s = size, color = colour)
         
         print(n_l,'was plotted successfully')
         output_r.append(r)
@@ -157,7 +173,7 @@ def plots():
         #axs[0].set_aspect(6)  
         #axs[0,0].legend()
         #axs[0,0].set_xlabel('Separation $r$ (GeV)')
-        ax1.set_ylabel('$u_{nl}(r)$')
+        ax1.set_ylabel('$u_{nl}(r)$', labelpad = 10)
         #axs[0,0].set_xticks([])
     j_psi = 0.437 + 0.160
     ax3.hlines(y=0.437 + 0.160, xmin=0.075, xmax=0.425, linewidth = 2, color = colours[0], linestyle =(0, (5, 1)))
@@ -170,13 +186,16 @@ def plots():
     ax3.set_xlim(0, 1)
     
 
-    
+    hyperfine_splittings = [0.047178795, 0.03892257,0.0367589]
     if bottonium_true:
-        for E, name, colour in zip(energy_b_plot, names_b, colours_b):
+        for E, name, colour,size, hyper in zip(energy_b_plot, names_b, colours_b, sizes,hyperfine_splittings):
             ax3.hlines(y=E, xmin=0.575, xmax=0.92, linewidth = 2, color = colour)
-            ax3.text(0.5 + 0.18, E+0.06, f'{name}', va='center', weight = 450, fontsize = 12)
+            ax3.text(0.5 + 0.18, E+0.10, f'{name}', va='center', weight = 450, fontsize = 12)
             ax3.set_ylabel('Binding energy $E_{nl}$')
             ax3.axhspan(E - 0.05*E, E + 0.05*E, xmin=0.575, xmax=0.92, color='lightgrey', alpha=0.5, edgecolor = 'none')
+            
+            ax3.hlines(y=E+hyper, xmin=0.575, xmax=0.92, linewidth = 2, linestyle = '--', color = colour)
+            #ax3.axhspan(E+hyper - 0.05*E+hyper, E+hyper + 0.05*E+hyper, xmin=0.575, xmax=0.92, color='lightgrey', alpha=0.5, edgecolor = 'none')
        # ax3.set_ylim(0.95, 2.2)
 
         _, _, u_1, r_1 = sch_solver(0,4.183,4.183,0.33, 1.348327636718755, 1.0327, 2.7) #n = 1
@@ -184,23 +203,44 @@ def plots():
         _, _, u_3, r_3 = sch_solver(0,4.183, 4.183, 0.33, 0.71376953125, 2.42474365234375, 5.5) #n = 3 
         #_, _, u_4, r_4 = sch_solver(0,4.183, 4.183, 0.33, 0.71376953125, 3.09832763671875, 6.3) #n = 4
 
-        ax2.hlines(y=0, xmin = min(r), xmax = max(r), linestyle = '--', color = 'grey')
-        ax2.scatter(r_1, u_1, marker = '.', s = 2, label = 'n = 1', color = colours_b[0])
-        ax2.scatter(r_2, u_2, marker = '.', s = 2, label = 'n = 2', color = colours_b[1])
-        ax2.scatter(r_3, u_3, marker = '.', s = 2, label = 'n = 3', color = colours_b[2])
+        ax2.hlines(y=0, xmin = min(r), xmax = 11.5, linestyle = '--', color = 'grey')
+        ax2.scatter(r_1, u_1, marker = '.', s = sizes[0], label = 'n = 1', color = colours_b[0])
+        ax2.scatter(r_2, u_2, marker = '.', s = sizes[1], label = 'n = 2', color = colours_b[1])
+        ax2.scatter(r_3, u_3, marker = '.', s = sizes[2], label = 'n = 3', color = colours_b[2])
         #axs[1].scatter(r_4, u_4, marker = '.', s = 2, label = 'n = 4')
         #axs[1].set_aspect(2)  
         #axs[1,0].legend()
-        ax2.set_ylabel('$u_{nl}(r)$')
+
+
+
+        ax2.set_ylabel('$u_{nl}(r)$', labelpad = 3)
         ax2.set_xlabel('Separation $r$ (GeV)')
+        
 
     #axs[1,1].yaxis.tick_right()
     #axs[1,1].yaxis.set_label_position("right")
     #axs[1,1].set_xticks([])
     #axs[1,1].set_xlim(0, 1)
+    ax1.tick_params( direction = 'in', width = 1.4, length = 6)
+    ax2.tick_params( direction = 'in', width = 1.4, length = 6)
+    ax1.minorticks_on()
+    ax2.minorticks_on()
+    ax1.tick_params( which =  'minor', direction = 'in') 
+    ax2.tick_params( which =  'minor', direction = 'in') 
+    ax1.set_xlim(xmin = 0, xmax = 11.5)
+    ax1.set_ylim(ymin = 0)
+    ax2.set_xlim(xmin = 0, xmax = 11.5)
 
-    plt.savefig('summative/results_test.png', bbox_inches = 'tight')
-    plt.savefig('summative/results_test.svg', bbox_inches = 'tight')
+
+    ax1.text(11.3, 0.65, r"$c\bar{c}$",ha='right', va='top', fontsize = 12, weight = 400)
+    ax2.text(11.3, 1.05, r"$b\bar{b}$",ha='right', va='top', fontsize = 12, weight = 400)
+
+    plt.minorticks_on()
+    plt.tick_params( direction = 'in', width = 1.4, length = 6)
+    plt.tick_params( which =  'minor', direction = 'in') 
+
+    plt.savefig('summative/results_test_minor.png', bbox_inches = 'tight')
+    plt.savefig('summative/results_test_minor.svg', bbox_inches = 'tight')
     #plt.show()
     
 

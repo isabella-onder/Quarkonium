@@ -111,12 +111,16 @@ def plots():
     output_r = []
     output_u = []
     #fig, axs = plt.subplots(ncols = 2, nrows = 2, figsize=(10, 4))
+    
+
+    
     fig, axs = plt.subplots(ncols = 2, nrows = 2, 
     gridspec_kw={
         'width_ratios': [6, 1],
         'height_ratios': [1, 1]
     })
     plt.subplots_adjust(wspace=0, hspace=0.03)
+    
     
     names = ['1S', '1P', '1D']
     colours = ['firebrick', 'chocolate', 'gold']
@@ -159,7 +163,7 @@ def plots():
     colours_b = ['royalblue', 'cornflowerblue', 'mediumturquoise']
     if bottonium_true:
         for E, name, colour in zip(energy_b_plot, names_b, colours_b):
-            axs[1,1].hlines(y=E, xmin=0.30, xmax=0.90, linewidth = 2)
+            axs[1,1].hlines(y=E, xmin=0.15, xmax=0.85, linewidth = 2, color = colour)
             axs[1,1].text(0.36, E+0.06, f'{name}', va='center', weight = 450, fontsize = 12)
             axs[1,1].set_ylabel('Binding energy $E_{nl}$')
             axs[1,1].axhspan(E - 0.05*E, E + 0.05*E, xmin=0.15, xmax=0.85, color=colour, alpha=0.15)

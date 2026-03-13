@@ -279,7 +279,7 @@ def alternative_mag_transition(n):
     print('Magnetic transition width', gamma_width/total_width, 'in fraction form using the alternative mag transition')
 
     return gamma_width
-alternative_mag_transition(2)
+#alternative_mag_transition(2)
 
 
 #using the ratio formulae in a paper to see whether they are better approx

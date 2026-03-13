@@ -38,7 +38,7 @@ def sch_solver(l,m_1,m_2,  alpha, beta, E_nl, rmax): #passing all system paramet
     #rmax = 6.3# extend beyond peak
     print('this is rmax',rmax)
 
-    r_eval = np.linspace(r0,rmax,15100)  #points to evaluate u(r) at, called by solve_ivp
+    r_eval = np.linspace(r0,rmax,20100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
     sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing) 
