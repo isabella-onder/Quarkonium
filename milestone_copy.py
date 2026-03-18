@@ -53,10 +53,10 @@ def sch_solver(l,m_1,m_2, E_nl, alpha, beta,n,rmax): #passing all system paramet
     r_eval = np.linspace(r0,rmax,20100)  #points to evaluate u(r) at, called by solve_ivp
 
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-    sol_1 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'RK23') 
-    sol_2 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'RK45') 
-    sol_3 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'DOP853') 
-    sol_4 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'BDF') 
+    sol_2 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'RK23') 
+    sol_3 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'RK45') 
+    sol_4 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'DOP853') 
+    sol_1 = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, E_nl, alpha, beta), events = zero_crossing, method = 'BDF') 
 
     u_1, v = sol_1.y[0], sol_1.y[1] 
     r_1 = sol_1.t
@@ -113,7 +113,10 @@ def origin_finder():
 
 
 def models():
-    u_tot, r_tot = sch_solver(0,0.00051099895,0.93827208816,-1.3605434566508328e-08 , 1/137, 0, 1, 3007579.15422085)
+    fig, axs = plt.subplots(nrows = 1, ncols =2, width_ratios=[5,2], figsize = (6,4))
+    plt.subplots_adjust(wspace=0)
+
+    u_tot, r_tot = sch_solver(0,0.00051099895,0.93827208816,-1.3605434566508328e-08 , 1/137, 0, 1, 3107579.15422085)
     normalised_u_tot = []
 
     integral = sp.integrate.simpson(u_tot[2]**2,r_tot[2]) #normalised according to our best result just to have meaning u on the y axis 
@@ -122,19 +125,53 @@ def models():
         normalised_u = u/(np.sqrt(integral))
         normalised_u_tot.append(normalised_u)
     u_tot = normalised_u_tot
-    colours = ['red', 'blue', 'green', 'grey']
-    models = ['RK23', 'RK45', 'DOP853', 'BDF']
-    fig, ax = plt.subplots()
-    for u, r, colour, model in zip(u_tot,  r_tot, colours, models):
-        plt.scatter(r/268082.760427755, u, marker = '.', color = colour, s = 9, label = model)
+    colours = ["#56A195", "#4E9BB7", "#D35328", '#2A69A4']
+    colours = ["#FFB700", "#876EBD",  "#3788C9", "#FF4000"]
+    colours = ["#FFB700","#36A8BA" , "#3D6E81", 'firebrick']
+
+    models = ['BDF', 'RK3', 'RK5', 'RK8']
+    energies_models = [-1.3599793090820318e-08, -1.3592001342773446e-08, -1.3605652465820318e-08, -1.360536437988282e-08]
+    analytic = -1.3605434566508328e-08
+
+
+
+    
+    axs[1].set_xticks([])
+    axs[1].yaxis.tick_right()
+    axs[1].yaxis.set_label_position("right")
+    axs[1].set_xlim(0, 1)
+
+    for u, r, colour, model, E in zip(u_tot,  r_tot, colours, models, energies_models):
+        axs[0].scatter(r/268082.760427755, u, marker = '.', color = colour, s = 7, label = model)
+        axs[1].hlines(y=-E*10**9, xmin=0.15, xmax=0.85, linewidth = 3, color = colour)
+
+    axs[0].set_xlim(xmin = 0, xmax = max(r_tot[0])/268082.760427755)
+    axs[0].set_ylim(ymin = -0.2*max(u), ymax = max(u)+0.7*max(u))
+    axs[0].hlines(y=0,xmin = 0, xmax = max(r)/268082.760427755,linewidth = 1.5, color='grey', linestyle = '--')
+
+    axs[1].hlines(y=-analytic*10**9, xmin=0, xmax=1, linewidth = 2, color = 'black', linestyle = '--')
     #ax.set_xlim([0, 15])
-    plt.xlabel('Separation $r$ ($a_0$)', size = 18)
-    plt.ylabel('$u_(r)$ ($10^{-6}$) by model', size = 18)
-    plt.xticks(size = 15)
-    plt.yticks(size = 15)
-    plt.tick_params(which = 'major', bottom = True, left = True,  direction = 'in') 
-    plt.legend(markerscale=10, fontsize=14)
-    plt.savefig("figs/model_plots.svg", bbox_inches = 'tight')
+    axs[0].set_xlabel(r'Separation $r \ (a_0)$ ', size = 12)
+    axs[0].set_ylabel(r'$u_{10}(r) \ (10^{-3})$', size = 12)
+
+    axs[1].set_ylabel('Binding energy $E_{10}$ (eV)', size = 12, labelpad = 12)
+
+    axs[0].tick_params( direction = 'in', width = 1.4, length = 6)
+    axs[1].tick_params( direction = 'in', width = 1.4, length = 6)
+    axs[0].minorticks_on()
+    axs[1].minorticks_on()
+    axs[0].tick_params( which =  'minor', direction = 'in') 
+    axs[1].tick_params( which =  'minor', direction = 'in') 
+    axs[0].tick_params(which = 'major', bottom = True, left = True,  direction = 'in') 
+    axs[1].tick_params(which = 'major', bottom = True, left = False,  direction = 'in') 
+
+    axs[0].legend(markerscale=8, fontsize=12)
+    from matplotlib.ticker import FuncFormatter
+    axs[0].yaxis.set_major_formatter(FuncFormatter(lambda y, pos: f'{y*1000:g}'))
+
+    #plt.savefig("summative/model_plots.svg", bbox_inches = 'tight')
+    plt.savefig("summative/model_plots.png", bbox_inches = 'tight', dpi = 150)
+
     plt.show()
 
 models()

@@ -141,7 +141,7 @@ def cex_chi_squared():
             print('There are not as many experimental as theo widths! need to update! ')
         #sum_elements = [(theo-exp)**2/error**2 for theo, exp, error in zip(ctheo_widths, bexp_widths, bexp_widths_errors)] #
         #print('this is ctheo_widths', ctheo_widths)
-        sum_elements = [(theo-exp)**2 for theo, exp in zip(ctheo_widths, cexp_widths)]
+        sum_elements = [abs(theo-exp) for theo, exp in zip(ctheo_widths, cexp_widths)]
         chi_squared_value = sum(sum_elements)
         chi_squared_arr.append(chi_squared_value)
 
@@ -161,7 +161,7 @@ def cex_chi_squared():
     plt.plot(alpha_arr, chi_squared_arr, color = 'chocolate')
     plt.ylabel(r"$\chi^2$")
     plt.xlabel(r"$\alpha$")
-    plt.savefig('figs/chi_squared_charmonium.svg', bbox_inches = 'tight')
+    plt.savefig('figs/chi_squared_charmonium.png', bbox_inches = 'tight')
     plt.show()
 
 
@@ -185,7 +185,7 @@ def c_ratio_chi_squared():
             print('There are not as many experimental as theo widths! need to update! ')
         #sum_elements = [(theo-exp)**2/error**2 for theo, exp, error in zip(ctheo_widths, bexp_widths, bexp_widths_errors)] #
         #print('this is ctheo_widths', ctheo_widths)
-        sum_elements = [(theo-exp)**2 for theo, exp in zip(c_ratio_theo_widths, c_ratio_exp_widths)]
+        sum_elements = [(theo-exp) for theo, exp in zip(c_ratio_theo_widths, c_ratio_exp_widths)]
         chi_squared_value = sum(sum_elements)
         chi_squared_arr.append(chi_squared_value)
     
@@ -204,7 +204,7 @@ def c_ratio_chi_squared():
     plt.plot(alpha_arr, chi_squared_arr, color = 'chocolate')
     plt.ylabel(r"$\chi^2$")
     plt.xlabel(r"$\alpha$")
-    plt.savefig('figs/ratios_chi_squared_charmonium.svg', bbox_inches = 'tight')
+    plt.savefig('figs/ratios_chi_squared_charmonium.png', bbox_inches = 'tight')
     plt.show()
 
 
@@ -249,8 +249,8 @@ def b_ratio_chi_squared():
     plt.show()
 
 
-cex_chi_squared()
-#bex_chi_squared()
+#cex_chi_squared()
+bex_chi_squared()
 #c_ratio_chi_squared()
 #b_ratio_chi_squared()
 #make it such that it prints optimal values for the best alpha/chi-squared

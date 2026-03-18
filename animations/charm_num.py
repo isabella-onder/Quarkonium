@@ -176,17 +176,17 @@ y_a_tot,y_b_tot,y_c_tot, y_d_tot, y_e_tot, y_f_tot = run()
 
 fig, ax = plt.subplots()
 
-plt.xlabel('time ($10^{-20} s$)')
-plt.ylabel('Percentage of particles in given state')
+plt.xlabel('Time ($10^{-20} $ s)', size = 16)
+plt.ylabel('Particle distribution (%)', size = 16)
 
 
 x_axis = xs+xs1
 plot_A = ax.plot(x_axis, y_a_tot/10,label = r'$J/\psi$', linewidth = 3, color = 'firebrick')[0]
-plot_B = ax.plot(xs+xs1, y_b_tot/10,label = r'$\ell\bar{\ell}$', linewidth = 2 , alpha = 0.6, color = 'grey', linestyle = ':')[0]
-plot_C = ax.plot(xs+xs1, y_c_tot/10,label = r'$ggg$', linewidth = 2, alpha = 0.6, color = 'grey', linestyle = '-.')[0]
-#plot_D = ax.plot(xs+xs1, y_d_tot,label = r'$\gamma gg$', linewidth = 2, alpha = 0.6, color = 'grey', linestyle = ':')[0]
-plot_E = ax.plot(xs+xs1, y_e_tot/10,label = r'$\eta_c(1S)$' , linewidth = 2, alpha = 0.6, color = 'grey', linestyle = '--')[0]
-#plot_F = ax.plot(xs+xs1, y_f_tot,label = r'$\gamma \gamma \gamma$', linewidth = 2, alpha = 0.6, color = 'grey' )[0]
+plot_C = ax.plot(xs+xs1, y_c_tot/10,label = r'$ggg$', linewidth = 1.5, alpha = 0.6, color = 'grey', linestyle = '-.')[0]
+plot_D = ax.plot(xs+xs1, y_d_tot/10,label = r'$\gamma gg$', linewidth = 1.5, alpha = 0.6, color = 'grey' )[0]
+plot_B = ax.plot(xs+xs1, y_b_tot/10,label = r'$\ell\bar{\ell}$', linewidth = 1.5 , alpha = 0.6, color = 'grey', linestyle = ':')[0]
+plot_E = ax.plot(xs+xs1, y_e_tot/10,label = r'$\eta_c(1S)$' , linewidth = 1.5, alpha = 0.6, color = 'grey', linestyle = '--')[0]
+#plot_F = ax.plot(xs+xs1, y_f_tot/10,label = r'$\gamma \gamma \gamma$', linewidth = 2, alpha = 0.6, color = 'grey' )[0]
 
 print(y_a_tot)
 y_target = 2000/10 # horizontal line level
@@ -202,17 +202,51 @@ plt.ylim(0,10000/10)
 plt.xlim(0,1.2)
 plt.hlines(y_target, 0, x_intersect, linestyle = '--', color = 'black', linewidth = 2)
 
+plt.tick_params(  width = 1.6, length = 6)
+plt.minorticks_on()
+plt.tick_params( which =  'minor') 
+plt.tick_params(labelsize = 11)
+
 # vertical line down to x-axis
 plt.vlines(x_intersect, 0, y_target, linestyle = '--', color = 'black', linewidth = 2)
 
+
+
+
+y_target_2 = 4000/10 # horizontal line level
+# Find intersection using interpolation
+
+y_a_target_2 = 4000
+index_2 = min(range(len(y_a_tot)), key=lambda i: abs(y_a_tot[i] - y_a_target_2))
+x_intersect_2 = x_axis[index_2]
+      
+#indices = [i for i, v in enumerate(y_a_tot) if v in (1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000, 2001, 2002,2003,2004,2005,2006,2007,2008,2009,2010)]
+#x_intersect = [x_axis[indices[0]]]
+plt.hlines(y_target_2, 0, x_intersect_2, linestyle = '--', color = 'black', linewidth = 2)
+plt.vlines(x_intersect_2, 0, y_target_2, linestyle = '--', color = 'black', linewidth = 2)
+
+
+# vertical line down to x-axis
+plt.vlines(x_intersect, 0, y_target, linestyle = '--', color = 'black', linewidth = 2)
+
+
+
+
+
+
 #ax.legend(loc = ' right')
-ax.legend()
+#plt.minorticks_on()
+plt.tick_params( width = 1.4, length = 4)
+#plt.tick_params( which =  'minor', direction = 'in') 
+
+ax.legend(loc = 'upper right', markerscale=11, fontsize=12)
 ax = plt.gca()
 ax.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f'{x/10:g}'))
-plt.savefig('summative/jpsi_plot.png', bbox_inches = 'tight')
-#plt.savefig('summative/jpsi_plot.svg', bbox_inches = 'tight')
+plt.savefig('summative/jpsi_plot.png', bbox_inches = 'tight', dpi = 150)
+plt.savefig('summative/jpsi_plot.svg', bbox_inches = 'tight')
 
-plt.title('Evolution of particle count according to state')
+
+#plt.title('Evolution of particle count according to state')
 
 '''
 def update(frame):

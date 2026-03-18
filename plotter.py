@@ -108,6 +108,7 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     labels = ['+0.1eV', '$E_{3,0}$ analytic', '-0.1eV'] #too high, perfect, too low
     colours = [ "#68B3D9", '#C85A5A', "#206C90"]
     colours = [ "#68B3D9", 'firebrick', "#206C90"]
+    colours = [ "#36A8BA", 'firebrick', "#2A596C"]
     #colours = ["#CE9300", '#D00000', '#6A040F']
     #colours = ['#264653',"#EDC45F",  '#81171B' ]
     #colours = [ "#68B3D9", "#C85A5A", "#226CB2"]
@@ -119,7 +120,7 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     #colours = ['grey', '#B1D0ED', , '#156082']
     #colours = ['darkseagreen', 'grey', 'peru']
     #scipy function to solve differential equations system. Unpack solutions both for u and v, and corresponding distances evaluated at
-    sizes = [5,20,5]
+    sizes = [12,20,12]
     for e,colour,label,size in zip(E_list, colours,labels,sizes):
         print('this is the current e', e)
         sol = sp.integrate.solve_ivp(system, [r0,rmax], initial_conditions, t_eval = r_eval, args = (l, mu, e, alpha, beta), events = zero_crossing) 
@@ -176,7 +177,7 @@ def plotter(l,m_1,m_2, n, alpha, beta): #passing all system parameters as argume
     
     #plt.legend(markerscale=11, fontsize=15, loc = 'lower left')
     plt.savefig("summative/divergence_plot_2.svg", bbox_inches = 'tight')
-    plt.savefig("summative/divergence_plot_2.png", bbox_inches = 'tight')
+    plt.savefig("summative/divergence_plot_2.png", bbox_inches = 'tight', dpi = 150)
 
     #plt.show()
     print(nodes_nb, turning_points_nb)

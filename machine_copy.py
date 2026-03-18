@@ -149,19 +149,19 @@ def plots():
     #for E_c, E_b in zip(analytic_c, analytic_b):
     #    ax3.hlines(y=E_c, xmin=0.075, xmax=0.425, linewidth = 1, color = 'black')
     #    ax3.hlines(y=E_b, xmin=0.575, xmax=0.92, linewidth = 1, color = 'black')
-
-    for n_l, name, colour, size in zip(energy_ranges_c, names, colours,sizes):
+    uncertainties = [0.0272, 0.0146, 0.01025] #they are practically symmetric anyways
+    for n_l, name, colour, size, error in zip(energy_ranges_c, names, colours,sizes,uncertainties):
         E, u, r = charmonium(n_l[0], n_l[1])
 
         ax3.hlines(y=E, xmin=0.075, xmax=0.425, linewidth = 2, color = colour)
 
     
         #axs[0,1].axvspan(0.15, 0.85, ymin = E - 0.05*E, ymax = E + 0.05*E, color=colour, alpha=0.5)
-        ax3.axhspan(E - 0.05*E, E + 0.05*E, xmin=0.075, xmax=0.425, color='lightgrey', alpha = 0.5,edgecolor = 'none')
+        ax3.axhspan(E - error, E + error, xmin=0.075, xmax=0.425, color='lightgrey', alpha = 0.7,edgecolor = 'none')
         #print(f'this colour {colour} should have range',  E - 0.05*E,  E + 0.05*E)
         
         ax3.text(0.18, E+0.06, f'{name}', va='center', weight = 450, fontsize = 12)
-        ax3.set_ylabel('Binding energy $E_{nl}$', labelpad = 12)
+        ax3.set_ylabel('Binding energy $E_{nl}$ (GeV)', labelpad = 12, size = 16)
         #axs[0,1].set_ylim(0.3, 1.4)
         #ax3.set_ylim()
 
@@ -173,26 +173,28 @@ def plots():
         #axs[0].set_aspect(6)  
         #axs[0,0].legend()
         #axs[0,0].set_xlabel('Separation $r$ (GeV)')
-        ax1.set_ylabel('$u_{nl}(r)$', labelpad = 10)
+        ax1.set_ylabel('$u_{nl}(r)$', labelpad = 11, size = 16)
         #axs[0,0].set_xticks([])
     j_psi = 0.437 + 0.160
     ax3.hlines(y=0.437 + 0.160, xmin=0.075, xmax=0.425, linewidth = 2, color = colours[0], linestyle =(0, (5, 1)))
-    ax3.axhspan(j_psi - 0.05*j_psi, j_psi + 0.05*j_psi, xmin=0.075, xmax=0.425, color='lightgrey', alpha = 0.5, edgecolor = 'none')
+    #ax3.axhspan(j_psi - 0.0227, j_psi + 0.0227, xmin=0.075, xmax=0.425, color='lightgrey', alpha = 0.5, edgecolor = 'none')
     ax3.text(0.18, j_psi+0.06, '1S', va='center', weight = 450, fontsize = 12)
     #axs[0,1].hlines(y=1.20, xmin=0.3, xmax=0.7, colors='blue')
     ax3.set_xticks([])
     ax3.yaxis.tick_right()
     ax3.yaxis.set_label_position("right")
     ax3.set_xlim(0, 1)
+    ax3.set_ylim(ymax = 2.2)
     
 
     hyperfine_splittings = [0.047178795, 0.03892257,0.0367589]
+    uncertainties_b = [0.0068, 0.00498, 0.00449]
     if bottonium_true:
-        for E, name, colour,size, hyper in zip(energy_b_plot, names_b, colours_b, sizes,hyperfine_splittings):
+        for E, name, colour,size, hyper,error in zip(energy_b_plot, names_b, colours_b, sizes,hyperfine_splittings, uncertainties):
             ax3.hlines(y=E, xmin=0.575, xmax=0.92, linewidth = 2, color = colour)
             ax3.text(0.5 + 0.18, E+0.10, f'{name}', va='center', weight = 450, fontsize = 12)
-            ax3.set_ylabel('Binding energy $E_{nl}$')
-            ax3.axhspan(E - 0.05*E, E + 0.05*E, xmin=0.575, xmax=0.92, color='lightgrey', alpha=0.5, edgecolor = 'none')
+            ax3.set_ylabel('Binding energy $E_{nl}$ (GeV)', size = 16)
+            ax3.axhspan(E - error, E + error, xmin=0.575, xmax=0.92, color='lightgrey', alpha=0.7, edgecolor = 'none')
             
             ax3.hlines(y=E+hyper, xmin=0.575, xmax=0.92, linewidth = 2, linestyle = '--', color = colour)
             #ax3.axhspan(E+hyper - 0.05*E+hyper, E+hyper + 0.05*E+hyper, xmin=0.575, xmax=0.92, color='lightgrey', alpha=0.5, edgecolor = 'none')
@@ -213,16 +215,16 @@ def plots():
 
 
 
-        ax2.set_ylabel('$u_{nl}(r)$', labelpad = 3)
-        ax2.set_xlabel('Separation $r$ (GeV)')
+        ax2.set_ylabel('$u_{nl}(r)$', labelpad = 3, size = 16)
+        ax2.set_xlabel('Separation $r$ (GeV)',size = 16)
         
 
     #axs[1,1].yaxis.tick_right()
     #axs[1,1].yaxis.set_label_position("right")
     #axs[1,1].set_xticks([])
     #axs[1,1].set_xlim(0, 1)
-    ax1.tick_params( direction = 'in', width = 1.4, length = 6)
-    ax2.tick_params( direction = 'in', width = 1.4, length = 6)
+    ax1.tick_params( direction = 'in', width = 1.6, length = 6)
+    ax2.tick_params( direction = 'in', width = 1.6, length = 6)
     ax1.minorticks_on()
     ax2.minorticks_on()
     ax1.tick_params( which =  'minor', direction = 'in') 
@@ -230,16 +232,21 @@ def plots():
     ax1.set_xlim(xmin = 0, xmax = 11.5)
     ax1.set_ylim(ymin = 0)
     ax2.set_xlim(xmin = 0, xmax = 11.5)
+    ax1.tick_params(axis='x', labelbottom=False)
 
 
-    ax1.text(11.3, 0.65, r"$c\bar{c}$",ha='right', va='top', fontsize = 12, weight = 400)
-    ax2.text(11.3, 1.05, r"$b\bar{b}$",ha='right', va='top', fontsize = 12, weight = 400)
+    ax1.text(11.3, 0.65, r"$c\overline{c}$",ha='right', va='top', fontsize = 12, weight = 400)
+    ax2.text(11.3, 1.05, r"$b\overline{b}$",ha='right', va='top', fontsize = 12, weight = 400)
 
-    plt.minorticks_on()
-    plt.tick_params( direction = 'in', width = 1.4, length = 6)
-    plt.tick_params( which =  'minor', direction = 'in') 
+   # plt.xticks(size = 16)
+    #plt.yticks(size = 16)
 
-    plt.savefig('summative/results_test_minor.png', bbox_inches = 'tight')
+
+    ax3.minorticks_on()
+    ax3.tick_params( direction = 'in', width = 1.4, length = 6)
+    ax3.tick_params( which =  'minor', direction = 'in') 
+
+    plt.savefig('summative/results_test_minor.png', bbox_inches = 'tight', dpi = 150)
     plt.savefig('summative/results_test_minor.svg', bbox_inches = 'tight')
     #plt.show()
     

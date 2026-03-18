@@ -16,6 +16,7 @@ energy_ranges_c = {
     (1,1): [0,0,1],
     (1,2): [0.8, 0, 1.5],
     (2,0): [0.5, 0, 1.3],
+    (2,1): [1.0,0, 2.0],
     (3,0):(1.1,0,2.0)
 }
 
@@ -36,8 +37,10 @@ energy_ranges_b = {
     (2,1): [1.7,0,2.0],
     (3,0): [1.8, 0, 2.2],
     (3,1): [2.1, 0, 2.3],
-    (4,0): [2.1, 0, 2.3]
-
+    (3,2): [2.25, 0, 2.9],
+    (4,0): [2.1, 0, 2.3],
+    (4,1): [2.1, 0, 2.9],
+    (4,2):[2.41,0,2.9]
 }
 
 #taking the ground states
@@ -81,6 +84,8 @@ def get_energy_range(n, l, type):
 def charmonium(n,l):
     quark = 'CHARM'
     E_n, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c, c.beta_c, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
+    #E_n_plus, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c+0.03, c.beta_c, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
+    #E_n_minus, _ , u, v, r =  output(l,c.m_c,c.m_c,get_energy_range(n,l,quark), c.alpha_c-0.03, c.beta_c, rmax)  #returns the final E_n and corresponding final_node (i.e. where it was cut off I think)
 
     print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l} is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
     return E_n, u, r
@@ -89,12 +94,13 @@ def bottonium(n,l):
     quark = 'BOTTOM'
 
     E_n, _ , u , v, r = output(l, c.m_b, c.m_b, get_energy_range(n,l,quark), c.alpha_b, c.beta_b, rmax )
-    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n, 'GeV', '\n############################################################################## \n' )
+    
+    print(f'\n##############################################################################\n {quark} QUARKONIUM \n The final estimated energy for n = {n}, l = {l}  is E_nl = ', E_n,  'GeV', '\n############################################################################## \n' )
     return E_n, u, r
 
     
-#charmonium(3,0)
-#bottonium(4,0)
+charmonium(1,0)
+#ottonium(3,0)
 
 def normalise(u,r):
     integral = sp.integrate.simpson(u**2,r)                           
@@ -197,7 +203,7 @@ def plots():
 
 #Hyperfine splitting for n = 1 is 0.1604870964121239     
 #Hyperfine splitting for n = 2 is 0.11566129414755096
-plots()
+#plots()
 
 
  #not interesting to do hyperfine, radial wavefunction does not look any good
