@@ -69,7 +69,7 @@ def hyperfine_splitting(n):
     print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
     return delta_e
 
-hyperfine_splitting(4)
+#hyperfine_splitting(4)
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split

@@ -189,10 +189,10 @@ plot_E = ax.plot(xs+xs1, y_e_tot/10,label = r'$\eta_c(1S)$' , linewidth = 1.5, a
 #plot_F = ax.plot(xs+xs1, y_f_tot/10,label = r'$\gamma \gamma \gamma$', linewidth = 2, alpha = 0.6, color = 'grey' )[0]
 
 print(y_a_tot)
-y_target = 2000/10 # horizontal line level
+y_target = 3000/10 # horizontal line level
 # Find intersection using interpolation
 
-y_a_target = 2000
+y_a_target = 3000
 index = min(range(len(y_a_tot)), key=lambda i: abs(y_a_tot[i] - y_a_target))
 x_intersect = x_axis[index]
       
@@ -213,10 +213,10 @@ plt.vlines(x_intersect, 0, y_target, linestyle = '--', color = 'black', linewidt
 
 
 
-y_target_2 = 4000/10 # horizontal line level
+y_target_2 = 6000/10 # horizontal line level
 # Find intersection using interpolation
 
-y_a_target_2 = 4000
+y_a_target_2 = 6000
 index_2 = min(range(len(y_a_tot)), key=lambda i: abs(y_a_tot[i] - y_a_target_2))
 x_intersect_2 = x_axis[index_2]
       
