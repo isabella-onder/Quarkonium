@@ -27,7 +27,7 @@ Further tasks it can do:
 - For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip).
 - Finds decay widths for various processes according to QCD formulae: lepton, hadronic, magnetic and radiative decay.
 - Optimise the strong coupling constant by using finding minimum difference between numerical and experimental values, using analytic relationships. 
-Next up: clearing up the code, making plots, making photon spectra for j/psi, investigating higher energies, implementing stewart clark lecture content, investigating errors more rigorously. 
+--> corroborates J/Psi suppression in the Quark Gluon Plasma observed at CERN and RHIC, as expected theoretically (Matsui, 2003).
 
 
 
