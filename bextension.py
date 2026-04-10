@@ -10,6 +10,8 @@ import constants as c
 plot_wanted = False 
 quark = 'BOTTOM'
 
+wrong_origin = False
+
 #all the data below will initially be extracted in origin_b out of output from quarkonium.py and then reused independently from there
 
 #for the shiggles: spherical harmonics calculator, to be able to produce full wavefunction
@@ -44,7 +46,7 @@ eta_error = 0.0024
 # Assume that necessarily l = 0 
 def origin_b(n):
     type_b = 'BOTTOM'
-    _, _, u, v, r = output(0, c.m_b, c.m_b, machine.get_energy_range(n, 0, type_b), c.alpha_b, c.beta, c.rmax)
+    _, _, u, v, r = output(0, c.m_b, c.m_b, machine.get_energy_range(n, 0, type_b), c.alpha_b, c.beta_b, c.rmax)
     origin = u[0], v[0]
     #just_after_origin = u[1], v[1]
     #print('with corresponding 2 r', r[0], r[1], r[5], r[1000])
@@ -64,14 +66,14 @@ def hyperfine_splitting(n):
     u_0, v_0 = origin_values
     delta_e = 8/9 * c.alpha_b/c.m_b**2 * v_0**2 
     #print('these are the origin values u, v', origin_values)
-    #print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
+    print('Hyperfine splitting for n = '+ str(n)+' is', delta_e)
     return delta_e
 
-#hyperfine_splitting(1)
+#hyperfine_splitting(4)
 
 #inputting the formulae to calculate simple transitions: nothing more to compute
 def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hyperfine says whether to add the hyperfine energy split
-    E_n, _ , _, _, _ =  output(l,c.m_b,c.m_b,machine.get_energy_range(n, 0, quark), c.alpha_b, c.beta, c.rmax) #no care about rmax since just extracting the energy anyways
+    E_n, _ , _, _, _ =  output(l,c.m_b,c.m_b,machine.get_energy_range(n, 0, quark), c.alpha_b, c.beta_b, c.rmax) #no care about rmax since just extracting the energy anyways
     if hyperfine:
         extracted_mass = E_n + hyperfine_splitting(1) + 2 * c.m_b
     else:
@@ -82,16 +84,16 @@ def extracting_mass(n = int, l = int, hyperfine = bool): #give n and l value, hy
 
 
 #at the start of each one I would do the same values called hence a function:
-def header():
-    M = extracting_mass(1,0,True)
-    origin_values, _, _, _ = origin_b(1)
-    energy = machine.bottonium(1,0)
+def header(n):
+    M = extracting_mass(n,0,True)
+    origin_values, _, _, _ = origin_b(n)
+    energy,_,_ = machine.bottonium(n,0)
     
     u_0, v_0 = origin_values #we approx v_0 as R(0)
 
     #getting the correct v0
-    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1) , c.alpha_c, c.beta, c.rmax)
-    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_c, c.m_c, energy + hyperfine_splitting(1), c.alpha_c, c.beta, lep_final_node_1)
+    _, _, _, _, _, lep_final_node_1 = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(n) , c.alpha_b, c.beta_b, c.rmax)
+    _, _, lep_u, lep_v, lep_r, lep_final_node = sch_solver(0, c.m_b, c.m_b, energy +hyperfine_splitting(n), c.alpha_b, c.beta_b, lep_final_node_1)
     lep_integral_to_normalise = sp.integrate.simpson(lep_u**2,lep_r)                   
     lep_normalised_u = lep_u/(np.sqrt(lep_integral_to_normalise))
     print('these are the first values lep_v and hyperv', lep_v[0]/lep_integral_to_normalise)
@@ -101,11 +103,19 @@ def header():
     print(M, energy, v_0, lep_normalised_v[0])
     return M, energy, v_0, lep_normalised_v[0]
 
-#header()
+#header(2)
+
 M = 9.43290539176862 #GeV total mass of B n = 1 spin up
 energy = 1.03314208984375 #GeV energy of binding energy of n = 1 l = 0
 v_0 = 1.540662693150416 # value of the wavefunction at the origin for n = 1 l = 0 spin down
+
+#the one giving good results: keeping that one from the previous beta, since more appropriate alpha
 lep_normalised_v = 2.8229989433130935 # value of the wavefunction at the origin n =  l = 0 spin up
+#lep_normalised_v = 3.7371766755216824 
+
+if wrong_origin:
+    M = 2*c.m_b
+    #lep_normalised_v = v_0
 
 #THE FOLLOWING ARE ALL assuming for J/psi specifically, so n = 1, l = 0
 def lepton_decay(alpha):
@@ -115,13 +125,16 @@ def lepton_decay(alpha):
 
     lepton_width = (16*np.pi*(1/137)**2*Psi**2/(9*(M)**2))*(1-(16*alpha)/(3*np.pi))
     lepton_width_original = (16*np.pi*(1/137)**2*Psi_o**2/(9*(M)**2))*(1-(16*alpha)/(3*np.pi))
+
+    alternative_width = (16*np.pi *(1/137)**2*c.e_b**2)/M**2 * (1-4*c.m_b**2/M**2)**(1/2) * (1+2*c.m_b**2/M**2) * Psi**2
     
     print('############################################################## \n Lepton width original (GeV)', lepton_width_original, '\n #############################################################')
     print('############################################################## \n Lepton width correct (GeV)', lepton_width, '\n #############################################################')
+    print('############################################################## \n Lepton width alternative (GeV)', alternative_width, '\n #############################################################')
     print('############################################################## \n Lepton width correct positron, tauons, muons (GeV)', positron_percent*total_width , tau_percent*total_width, muon_percent*total_width, '\n #############################################################')
 
-    return lepton_width
-#lepton_decay()
+    return alternative_width
+#lepton_decay(0.17131313131313133)
 
 
 def three_gluons(alpha):
@@ -168,12 +181,16 @@ def one_g_two_g(alpha): #i.e. one photon (gamma) and two gluons
 
 #hmm cannot seem to see the experimental value: hold off for now
 def three_photons():
-    
-    
-    
-    print('this is the three photon width', )
-    print('this is the real experimental value', )
+    m = M
+    Psi_o = v_0*y_00
+    Psi = lep_normalised_v*y_00
 
+    three_photons = (64*(np.pi**2 - 9) * alpha**3 * psi**2)/(2187*m**2)*(1 - 12.6 * alpha/np.pi)
+    
+    
+    print('this is the three photon width', three_photons)
+    print('this is the real experimental value', total_width * percent )
+    return three_photons
 #three_photons()
 
 
@@ -217,8 +234,8 @@ def alternative_mag_transition(n):
 
   
     #hyperfine results: use l = 0 and other constants as usual. do it twice to get the final_node and then normalise
-    _, _, _, _, _, hyper_final_node_1 = sch_solver(0, c.m_b, c.m_b, energy + k_gamma, c.alpha_b, c.beta, c.rmax)
-    hyper_nodes_nb, hyper_turning_points_nb, hyper_u, hyper_v, hyper_r, hyper_final_node = sch_solver(0, c.m_b, c.m_b, energy + k_gamma, c.alpha_b, c.beta, hyper_final_node_1)
+    _, _, _, _, _, hyper_final_node_1 = sch_solver(0, c.m_b, c.m_b, energy + k_gamma, c.alpha_b, c.beta_b, c.rmax)
+    hyper_nodes_nb, hyper_turning_points_nb, hyper_u, hyper_v, hyper_r, hyper_final_node = sch_solver(0, c.m_b, c.m_b, energy + k_gamma, c.alpha_b, c.beta_b, hyper_final_node_1)
     hyper_integral_to_normalise = sp.integrate.simpson(hyper_u**2,hyper_r)                   
     hyper_normalised_u = hyper_u/(np.sqrt(hyper_integral_to_normalise))
     
@@ -226,7 +243,7 @@ def alternative_mag_transition(n):
     #hence have to do it manually, for there not to be an issue with finding the energy
     #_, _, u, v, r = output(0, c.m_b, c.m_b, machine.get_energy_range(n, 0, type_b), c.alpha_b, c.beta, hyper_final_node)
 
-    _, _, casual_u, casual_v, casual_r, casual_final_node = sch_solver(0, c.m_b, c.m_b, energy , c.alpha_b, c.beta, hyper_final_node_1)
+    _, _, casual_u, casual_v, casual_r, casual_final_node = sch_solver(0, c.m_b, c.m_b, energy , c.alpha_b, c.beta_b, hyper_final_node_1)
     casual_integral_to_normalise = sp.integrate.simpson(casual_u**2,casual_r)                   
     casual_normalised_u = casual_u/(np.sqrt(casual_integral_to_normalise))
     #print('these are the first values v and hyperv', casual_v[0]/casual_integral_to_normalise, hyper_v[0]/hyper_integral_to_normalise)
@@ -241,7 +258,7 @@ def alternative_mag_transition(n):
     
     #using the given formula for magnetic transition, using the previously found splitting energy (fine or hyperfine?)
     gamma_width = 4 * alpha_em * e_Q**2 /(3*(c.m_b)**2) * (1+kappa_Q)**2 *k_gamma**3 * integral
-    #print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
+    print('Magnetic transition width', gamma_width, 'in GeV using the alternative mag transition')
     return gamma_width
 #alternative_mag_transition(1)
 
