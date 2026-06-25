@@ -2,15 +2,15 @@
 
 ### Supervised by Dr Ivan Martinez Soler ###
 
+
 <u>Milestone project</u> 
 
-Plot the probability density function and find the energy E_nl of the n = 2, l = 1 state of Hydrogen.
-Completed.
+TASK: Plot the probability density function and find the energy E_nl of the n = 2, l = 1 state of Hydrogen.
 
-Further tasks it can do:
-- numerically solve Schrodinger equation for given energy and hence plot (normalised) probability density
-- iterate over given range to find E_nl to 3 s.f. and cut off before divergence
-- finds ernergy automatically: for given n and l, knowing the number of turning points, finds energy without requiring an energy range input 
+Further tasks the code can do:
+- numerically solve Schrodinger's equation for a given energy E_nl and hence plot the normalised probability density,
+- iterate over given range to find E_nl to 3 s.f. and cut off before divergence,
+- finds energy automatically: for given n and l, knowing the number of turning points, finds energy without requiring an energy range input.
 
 
 
@@ -23,10 +23,10 @@ You can then use this to give predictions for the energy and produce plots of th
 Completed.
 
 Further tasks it can do:
-- Calculate binding energies for given l and energy range (which is automatically input), numerically find radial wavefunction until divergence.
-- For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip).
-- Finds decay widths for various processes according to QCD formulae: lepton, hadronic, magnetic and radiative decay.
-- Optimise the strong coupling constant by using finding minimum difference between numerical and experimental values, using analytic relationships. 
+- Calculate binding energies for given l and energy range (which is automatically input), numerically find radial wavefunction until divergence,
+- For s-states: approximate wavefunction at origin and hence find hyperfine splitting energy & width for magnetic transition (i.e. spin flip),
+- Finds decay widths for various processes according to QCD formulae: lepton, hadronic, magnetic and radiative decay,
+- Optimise the strong coupling constant by using finding minimum difference between numerical and experimental values, using analytic relationships.
 --> corroborates J/Psi suppression in the Quark Gluon Plasma observed at CERN and RHIC, as expected theoretically (Matsui, 2003).
 
 
@@ -35,7 +35,7 @@ Further tasks it can do:
 
 
 ### User's guide ###
-Upload all files. Call "charmonium(n,l)" from the machine.py file with desired n and l quantum numbers to get E_nl. 
+Download all files. Call "charmonium(n,l)" from the machine.py file with desired n and l quantum numbers to get E_nl. 
 To obtain radial wavefunction plot, just unhash plt.show() at the bottom of quarkonium.py. Note to self: make it a Boolean toggle. 
 To obtain info on transition: run extension.py.
 
